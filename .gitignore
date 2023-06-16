@@ -1,0 +1,4 @@
+.idea/
+venv/
+backend/.env
+backend/refresh_token.txt
