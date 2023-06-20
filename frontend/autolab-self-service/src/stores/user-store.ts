@@ -4,6 +4,7 @@ interface UserData {
   username: string
   firstName: string
   lastName: string
+  isAdmin: boolean
 }
 
 export const useUserStore = defineStore("user-store", {

@@ -44,6 +44,7 @@ class User(Base):
             "username": self.username,
             "firstName": self.first_name,
             "lastName": self.last_name,
+            "isAdmin": self.is_admin,
         }
 
     @staticmethod
