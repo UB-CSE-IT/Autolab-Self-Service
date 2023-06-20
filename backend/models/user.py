@@ -39,6 +39,13 @@ class User(Base):
             self.last_login = func.now()
             db.commit()
 
+    def to_dict(self):
+        return {
+            "username": self.username,
+            "firstName": self.first_name,
+            "lastName": self.last_name,
+        }
+
     @staticmethod
     def get_by_username(username: str) -> "User":
         return get_db_session().query(User).filter(User.username == username).first()

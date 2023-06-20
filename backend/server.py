@@ -1,8 +1,6 @@
 import os
-
-from flask import Flask, Blueprint, jsonify, request, make_response
+from flask import Flask, Blueprint, jsonify, request, make_response, g, redirect
 from dotenv import load_dotenv
-
 from backend import db
 from backend.connections.AutolabApiConnection import AutolabApiConnection
 from backend.connections.InfosourceConnection import InfoSourceConnection
@@ -21,7 +19,13 @@ app.infosource = InfoSourceConnection(os.getenv("INFOSOURCE_USERNAME"),
 app.course_store = CourseStore(app.infosource)
 
 
-@app.api.route("/login/")
+@app.api.before_request
+def before_request():
+    session_cookie = request.cookies.get("ubcse_autolab_portal_session", "")
+    g.user = Session.get_user(session_cookie)
+
+
+@app.api.route("/login/", methods=["POST"])
 def login():
     username = request.headers.get("Uid")
     person_number = request.headers.get("Pn")
@@ -45,21 +49,50 @@ def login():
     session, token = Session.create(user)
     ret = {
         "success": True,
-        "data": {
-            "username": user.username,
-            "person_number": user.person_number,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-        }
+        "data": user.to_dict()
     }
-    resp = make_response(jsonify(ret))
+    resp = make_response(redirect("/portal"))
     resp.set_cookie("ubcse_autolab_portal_session", token, samesite="Strict", secure=True, httponly=True,
                     max_age=1735707600)
     return resp
 
 
+@app.api.route("/logout/", methods=["POST"])
+def logout():
+    session_cookie = request.cookies.get("ubcse_autolab_portal_session", "")
+    session = Session.get_session(session_cookie)
+    if session is not None:
+        session.logout()
+    resp = make_response(redirect("/portal"))
+    resp.set_cookie("ubcse_autolab_portal_session", "", samesite="Strict", secure=True, httponly=True, max_age=0)
+    return resp
+
+
+@app.api.route("/userinfo/")
+def userinfo():
+    if g.user is None:
+        return jsonify({
+            "success": False,
+            "error": "You are not logged in."
+        }), 401
+    return jsonify({
+        "success": True,
+        "data": g.user.to_dict()
+    })
+
+
 @app.api.route("/my-courses/<string:username>/")
 def my_courses(username: str):
+    if g.user is None:
+        return jsonify({
+            "success": False,
+            "error": "You are not logged in."
+        }), 401
+    if g.user.username != username and not g.user.is_admin:
+        return jsonify({
+            "success": False,
+            "error": "You only authorized to view your own courses."
+        }), 403
     return jsonify(app.course_store.get_professors().get(username).to_dict())
 
 

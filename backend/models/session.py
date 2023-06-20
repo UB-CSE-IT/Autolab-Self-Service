@@ -1,4 +1,5 @@
 import datetime
+import pytz
 from typing import Tuple, Optional
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, func
 from backend.db import Base, get_db_session
@@ -14,6 +15,7 @@ class Session(Base):
     hashed_token = Column(String)
     expires_at = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    logged_out_at = Column(DateTime(timezone=True), default=None)
 
     @staticmethod
     def create(user: User) -> Tuple["Session", str]:
@@ -31,12 +33,23 @@ class Session(Base):
             db.commit()
         return s, token
 
+    def logout(self):
+        # Set the logged_out_at field to the current time
+        with get_db_session() as db:
+            self.logged_out_at = func.now()
+            db.commit()
+
+    @staticmethod
+    def get_session(unhashed_token) -> Optional["Session"]:
+        hashed_token = sha256_hash(unhashed_token)
+        session = get_db_session().query(Session).filter(Session.hashed_token == hashed_token).first()
+        return session
+
     @staticmethod
     def get_user(unhashed_token) -> Optional[User]:
         # Given an unhashed token, return the user associated with the session if one exists
-        hashed_token = sha256_hash(unhashed_token)
-        session = get_db_session().query(Session).filter(Session.hashed_token == hashed_token).first()
-        if session is None or session.expires_at < func.now():
+        session = Session.get_session(unhashed_token)
+        if session is None or session.expires_at < datetime.datetime.now(pytz.utc) or session.logged_out_at is not None:
             return None
         return session.user
 
