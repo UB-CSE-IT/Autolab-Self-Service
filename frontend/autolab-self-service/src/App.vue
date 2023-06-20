@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import {useUserStore} from "stores/user-store";
+import {useUserStore} from 'stores/UserStore';
 
 const userStore = useUserStore()
 userStore.loadUserData()

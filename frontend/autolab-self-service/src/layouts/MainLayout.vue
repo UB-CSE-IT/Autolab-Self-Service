@@ -2,13 +2,15 @@
   <q-layout view="hHh lpR fFf">
 
     <q-header class="bg-primary text-white" height-hint="98">
-      <q-toolbar align="center">
+      <q-toolbar class="flex column content-center justify-center">
+        <q-btn flat to="/" no-caps>
         <q-toolbar-title>
           <q-avatar>
             <img src="/portal/icons/autolab.svg" alt="Autolab Logo">
           </q-avatar>
           Autolab Self-Service Portal
         </q-toolbar-title>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
@@ -35,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import {useUserStore} from "stores/user-store";
+import {useUserStore} from 'stores/UserStore';
 
 const userStore = useUserStore()
 </script>

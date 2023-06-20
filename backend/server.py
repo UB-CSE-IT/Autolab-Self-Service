@@ -47,10 +47,6 @@ def login():
             user.last_name = last_name
             db.commit()
     session, token = Session.create(user)
-    ret = {
-        "success": True,
-        "data": user.to_dict()
-    }
     resp = make_response(redirect("/portal"))
     resp.set_cookie("ubcse_autolab_portal_session", token, samesite="Strict", secure=True, httponly=True,
                     max_age=1735707600)
@@ -93,7 +89,16 @@ def my_courses(username: str):
             "success": False,
             "error": "You only authorized to view your own courses."
         }), 403
-    return jsonify(app.course_store.get_professors().get(username).to_dict())
+    professor = app.course_store.get_professors().get(username)
+    if professor is None:
+        return jsonify({
+            "success": False,
+            "error": "Instructor not found."
+        }), 403
+    return jsonify({
+        "success": True,
+        "data": professor.to_dict()
+    })
 
 
 def main():

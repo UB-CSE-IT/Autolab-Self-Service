@@ -1,13 +1,7 @@
-import {defineStore} from "pinia";
+import {defineStore} from 'pinia';
+import {UserData} from "src/types/UserData";
 
-interface UserData {
-  username: string
-  firstName: string
-  lastName: string
-  isAdmin: boolean
-}
-
-export const useUserStore = defineStore("user-store", {
+export const useUserStore = defineStore('user-store', {
   state: () => {
     return {
       loggedIn: false,
@@ -18,7 +12,7 @@ export const useUserStore = defineStore("user-store", {
   actions: {
     loadUserData() {
       this.userDataLoading = true
-      return fetch("/portal/api/userinfo/")
+      return fetch('/portal/api/userinfo/')
         .then(res => res.json())
         .then(res => {
           if (res.success) {
