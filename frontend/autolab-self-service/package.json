@@ -2,7 +2,7 @@
   "name": "autolab-self-service",
   "version": "0.0.1",
   "description": "A self-service portal for instructors to create their courses in Autolab",
-  "productName": "Autolab Self Service Portal",
+  "productName": "Autolab Self-Service Portal",
   "author": "Nicholas Myers",
   "private": true,
   "scripts": {
