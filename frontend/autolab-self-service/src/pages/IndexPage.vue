@@ -1,18 +1,20 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+  <q-page class="q-px-lg q-mx-auto" style="max-width: 1000px;">
+    <h3>Welcome, {{ userStore.userData.firstName }}!</h3>
+    <h6>What would you like to do today?</h6>
+
+    <form method="POST" action="/portal/api/logout/">
+      <q-btn label="Log out" color="primary" type="submit"/>
+    </form>
+
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { Todo, Meta } from 'components/models';
-import ExampleComponent from 'components/ExampleComponent.vue';
-import { ref } from 'vue';
+import {ref} from "vue";
+import {useUserStore} from "stores/user-store";
+
+const userStore = useUserStore()
 
 const todos = ref<Todo[]>([
   {
