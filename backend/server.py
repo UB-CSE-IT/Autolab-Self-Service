@@ -21,8 +21,15 @@ app.course_store = CourseStore(app.infosource)
 
 @app.api.before_request
 def before_request():
+    g.db = get_db_session()
     session_cookie = request.cookies.get("ubcse_autolab_portal_session", "")
     g.user = Session.get_user(session_cookie)
+
+
+@app.api.after_request
+def after_request(response):
+    g.db.close()
+    return response
 
 
 @app.api.route("/login/", methods=["POST"])
@@ -42,10 +49,9 @@ def login():
     user.login()
     if user.first_name != first_name or user.last_name != last_name:
         # Update the user's name if it has changed
-        with get_db_session() as db:
-            user.first_name = first_name
-            user.last_name = last_name
-            db.commit()
+        user.first_name = first_name
+        user.last_name = last_name
+        g.db.commit()
     session, token = Session.create(user)
     resp = make_response(redirect("/portal"))
     resp.set_cookie("ubcse_autolab_portal_session", token, samesite="Strict", secure=True, httponly=True,

@@ -17,6 +17,7 @@ DATABASE_URL = f"postgresql://{postgres_user}:{postgres_password}@{postgres_host
 engine = create_engine(DATABASE_URL)
 get_db_session = scoped_session(
     sessionmaker(bind=engine, expire_on_commit=False))  # Use this in other files to get a session
+# For Flask requests, use g.db because it'll keep the session open for the whole request
 Base = declarative_base()
 
 

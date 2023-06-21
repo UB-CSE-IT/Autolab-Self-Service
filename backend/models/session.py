@@ -1,8 +1,10 @@
 import datetime
 import pytz
 from typing import Tuple, Optional
+
+from flask import g
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, func
-from backend.db import Base, get_db_session
+from backend.db import Base
 from backend.models.user import User
 from backend.utils import generate_random_string, sha256_hash
 
@@ -28,21 +30,19 @@ class Session(Base):
             hashed_token=hashed_token,
             expires_at=datetime.datetime.now() + datetime.timedelta(days=15),
         )
-        with get_db_session() as db:
-            db.add(s)
-            db.commit()
+        g.db.add(s)
+        g.db.commit()
         return s, token
 
     def logout(self):
         # Set the logged_out_at field to the current time
-        with get_db_session() as db:
-            self.logged_out_at = func.now()
-            db.commit()
+        self.logged_out_at = func.now()
+        g.db.commit()
 
     @staticmethod
     def get_session(unhashed_token) -> Optional["Session"]:
         hashed_token = sha256_hash(unhashed_token)
-        session = get_db_session().query(Session).filter(Session.hashed_token == hashed_token).first()
+        session = g.db.query(Session).filter(Session.hashed_token == hashed_token).first()
         return session
 
     @staticmethod

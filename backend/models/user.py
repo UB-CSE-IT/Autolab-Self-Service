@@ -1,6 +1,7 @@
+from flask import g
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, func
 from sqlalchemy.orm import relationship
-from backend.db import Base, get_db_session
+from backend.db import Base
 
 
 class User(Base):
@@ -28,16 +29,14 @@ class User(Base):
             last_name=last_name,
             person_number=person_number,
         )
-        with get_db_session() as db:
-            db.add(u)
-            db.commit()
+        g.db.add(u)
+        g.db.commit()
         return u
 
     def login(self):
-        with get_db_session() as db:
-            self.login_count += 1
-            self.last_login = func.now()
-            db.commit()
+        self.login_count += 1
+        self.last_login = func.now()
+        g.db.commit()
 
     def to_dict(self):
         return {
@@ -49,4 +48,4 @@ class User(Base):
 
     @staticmethod
     def get_by_username(username: str) -> "User":
-        return get_db_session().query(User).filter(User.username == username).first()
+        return g.db.query(User).filter(User.username == username).first()
