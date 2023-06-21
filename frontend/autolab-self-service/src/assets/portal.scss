@@ -1,0 +1,45 @@
+.admin-info {
+  border-left: 6px solid $admin;
+  border-right: 6px solid $admin;
+  background: $admin-bg;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.autolab-card {
+  margin: 10px;
+  width: 450px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  transition-duration: .3s;
+}
+
+.autolab-card:hover {
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.autolab-card > .header {
+  background: $primary;
+  color: white;
+  font-size: 24px;
+  padding: 20px;
+}
+
+.autolab-card .element {
+  padding: 10px 20px;
+  border-bottom: 1px solid lightgray;
+}
+
+.autolab-card .element:hover {
+  background-color: lightgray;
+}
+
+.autolab-card > .actions {
+  padding: 10px;
+}
+
+a {
+  color: $primary;
+  text-decoration: none;
+}

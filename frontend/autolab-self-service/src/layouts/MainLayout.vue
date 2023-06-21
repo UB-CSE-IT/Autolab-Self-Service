@@ -4,12 +4,12 @@
     <q-header class="bg-primary text-white" height-hint="98">
       <q-toolbar class="flex column content-center justify-center">
         <q-btn flat to="/" no-caps>
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="/portal/icons/autolab.svg" alt="Autolab Logo">
-          </q-avatar>
-          Autolab Self-Service Portal
-        </q-toolbar-title>
+          <q-toolbar-title>
+            <q-avatar>
+              <img src="/portal/icons/autolab.svg" alt="Autolab Logo">
+            </q-avatar>
+            Autolab Self-Service Portal
+          </q-toolbar-title>
         </q-btn>
       </q-toolbar>
     </q-header>
@@ -19,7 +19,7 @@
       <div v-else>
         <q-page class="q-px-lg q-mx-auto" style="max-width: 1000px;">
           <div v-if="userStore.userDataLoading"
-          class="absolute-center">
+               class="absolute-center">
             <q-spinner-gears class="q-mb-lg" color="primary" size="100"/>
             <p>Loading profile</p>
           </div>
@@ -40,4 +40,5 @@
 import {useUserStore} from 'stores/UserStore';
 
 const userStore = useUserStore()
+import 'assets/portal.scss'
 </script>
