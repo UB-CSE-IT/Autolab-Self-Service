@@ -78,3 +78,11 @@ class CourseStore:
         # Get professors, read from local cache if fresh enough
         self.update_if_necessary()
         return self.instructors_cache
+
+    def get_by_unique_identifier(self, unique_id: str):
+        # Get course by unique identifier, read from local cache if fresh enough
+        self.update_if_necessary()
+        for course in self.courses_cache:
+            if course.unique_identifier == unique_id:
+                return course
+        return None

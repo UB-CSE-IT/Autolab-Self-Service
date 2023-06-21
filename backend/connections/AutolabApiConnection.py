@@ -153,15 +153,16 @@ class AutolabApiConnection:
                 self.__get_new_access_token()
                 return self.make_api_request(method, path, params, retry=True)
             print(f"Request failed even after getting a new access token with status code {r.status_code}")
-            print(f"Response: {r.text}")
-            raise Exception("Request failed")
+            message = "Response: " + r.text
+            print(message)
+            raise Exception(message)
         else:
             return r.json()
 
     def create_course(self, course_name: str, display_name: str, semester: str, instructor_email: str,
                       start_date: str, end_date: str) -> dict:
         params = {
-            "name": f"{course_name}-{semester}",
+            "name": f"{course_name}",  # Should include semester already, like "cse116-u23"
             "display_name": display_name,
             "semester": semester,
             "instructor_email": instructor_email,

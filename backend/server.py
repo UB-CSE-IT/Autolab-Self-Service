@@ -107,6 +107,54 @@ def my_courses(username: str):
     })
 
 
+@app.api.route("/create-course/", methods=["POST"])
+def create_course():
+    if g.user is None:
+        return jsonify({
+            "success": False,
+            "error": "You are not logged in."
+        }), 401
+    data = request.get_json()
+    unique_course_identifier = data.get("uniqueIdentifier")
+    course = app.course_store.get_by_unique_identifier(unique_course_identifier)
+    if course is None:
+        return jsonify({
+            "success": False,
+            "error": "Course not found."
+        }), 404
+    display_name = data.get("displayName")
+    if display_name is None:
+        return jsonify({
+            "success": False,
+            "error": "Missing required field: displayName"
+        }), 400
+    if g.user.username != course.instructor and not g.user.is_admin:
+        return jsonify({
+            "success": False,
+            "error": "You are not the instructor of this course."
+        }), 403
+
+    instructor_email = course.instructor + "@buffalo.edu"
+    technical_name = course.technical_name
+    semester_code = course.semester_code
+
+    try:
+        app.autolab.create_course_automatic_dates(technical_name, display_name, semester_code, instructor_email)
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": "Failed to create course on Autolab. " + str(e),
+        }), 500
+
+    return jsonify({
+        "success": True,
+        "data": {
+            "message": f"You successfully created the course {display_name}",
+            "location": f"https://autolab.cse.buffalo.edu/courses/{course.technical_name}",
+        }
+    })
+
+
 def main():
     # If, in the future, I want to use Alembic, remove this line:
     db.initialize()
