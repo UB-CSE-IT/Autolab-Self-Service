@@ -232,8 +232,7 @@ const state = reactive({
   loadingCourses: false,
   errorLoadingCourses: false,
   errorMessage: '',
-  // username: userStore.userData.username,  // TODO remove
-  username: 'hartloff',
+  username: userStore.userData.username,
   stage0: {
     selectedCourse: null as Course | null,
   },
