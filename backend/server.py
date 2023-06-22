@@ -32,7 +32,7 @@ def after_request(response):
     return response
 
 
-@app.api.route("/login/", methods=["POST"])
+@app.api.route("/login/", methods=["GET", "POST"])
 def login():
     username = request.headers.get("Uid")
     person_number = request.headers.get("Pn")
