@@ -2,7 +2,6 @@
   <q-page class="q-px-lg q-mx-auto" style="max-width: 1000px;">
     <h3>Create an Autolab Course</h3>
     <div>
-
       <div v-if="state.stage === 0">
         <q-btn icon="west" label="Back to portal home" color="primary" to="/"/>
         <h4>Step 1: Choose a Course</h4>
@@ -76,7 +75,7 @@
                 </ul>
               </li>
               <li>Follow the last course number with a <i>colon and space</i></li>
-              <li>Finally, "nickname" the course in <i>Title Case</i>.</li>
+              <li>Finally, "nickname" the course in <i>Title Case</i></li>
             </ul>
           </li>
           <li>Here are some examples we like to use. Note the spacing, capitalization, and punctuation.
@@ -115,22 +114,20 @@
         <q-input outlined v-model="state.stage1.typedDisplayName" input-style="font-size: 20px;"/>
         <h6 class="q-mb-none">Preview</h6>
         <div class="row justify-center">
-          <div class="autolab-card">
+          <div class="autolab-card" style="position:relative; overflow: hidden">
+            <div v-if="state.stage1.showingSampleGrade"
+                 style="position:absolute; bottom: -200px; right:20px">
+              <p class="text-h1 text-red sampleGrade">A+</p>
+            </div>
             <div class="header">
               {{ state.stage1.typedDisplayName }} ({{ state.stage0.selectedCourse.semesterCode }})
             </div>
-            <div class="element">
-              Genetic Algorithm
-            </div>
-            <div class="element">
-              Malloc
-            </div>
-            <div class="element">
-              Bug2
+            <div v-for="assignment in state.stage1.sampleAssignments" :key="assignment" class="element">
+              {{ assignment }}
             </div>
             <div class="actions">
-              <q-btn label="Course page" color="white" text-color="primary" flat/>
-              <q-btn label="Gradebook" color="white" text-color="primary" flat/>
+              <q-btn label="Course page" @click="updateSampleAssignments" color="white" text-color="primary" flat/>
+              <q-btn label="Gradebook" @click="toggleSampleGrade" color="white" text-color="primary" flat/>
             </div>
           </div>
         </div>
@@ -150,7 +147,9 @@
           feel free to <a target="_blank" href="https://autolab.cse.buffalo.edu/contact">contact CSE IT</a> for a custom
           solution.</p>
         <div class="row justify-center">
-          <div class="autolab-card">
+          <div class="autolab-card" style="position:relative;">
+
+
             <div class="header">
               {{ state.stage2.displayName }} ({{ state.stage0.selectedCourse.semesterCode }})
             </div>
@@ -176,19 +175,36 @@
       <div v-else-if="state.stage === 3">
         <div v-if="state.stage3.loading">
           <h4>Waiting for response from Autolab...</h4>
+          <q-spinner-hourglass color="primary" size="100px"/>
         </div>
         <div v-else-if="state.stage3.error">
           <q-btn icon="west" label="Try again" color="primary" @click="moveToStage2"/>
-          <h4>Error</h4>
-          <p>{{ state.stage3.errorMessage }}</p>
-          <p>If that's not descriptive enough to resolve the problem,
+          <h4>
+            <q-icon name="warning" class="q-mr-md" color="negative"/>
+            Something went wrong!
+          </h4>
+          <p>Server response: {{ state.stage3.errorMessage }}</p>
+          <p>If that's not descriptive enough to resolve the problem, or the problem isn't something in your control,
             <a target="_blank" href="https://autolab.cse.buffalo.edu/contact">contact us</a>.</p>
         </div>
-        <div v-else>
+        <div class="" v-else>
           <q-btn icon="west" label="Back to portal home" color="primary" to="/"/>
-          <h4>Success!</h4>
-          <p>{{ state.stage3.response.message }}</p>
-          <q-btn :href="state.stage3.response.location" label="Go to course page" color="primary"/>
+          <div class="column items-center content-center">
+            <h4 class="q-mb-lg">Success!</h4>
+            <p>Your course has been created on Autolab!</p>
+            <img class="q-ma-md" src="/portal/icons/autolab.svg" height="100" alt="Autolab Logo"/>
+            <p class="q-mt-md">You can add additional instructors and import your student roster from the course
+              page.</p>
+            <q-btn class="q-mt-md" icon-right="outbound" target="_blank" :href="state.stage3.response?.location"
+                   label="Go to course page"
+                   color="primary"/>
+          </div>
+          <q-expansion-item
+            class="q-ma-xl"
+            icon="info"
+            label="More information">
+            <p>Server response: {{ state.stage3.response }}</p>
+          </q-expansion-item>
         </div>
       </div>
     </div>
@@ -216,12 +232,15 @@ const state = reactive({
   loadingCourses: false,
   errorLoadingCourses: false,
   errorMessage: '',
-  username: userStore.userData.username,
+  // username: userStore.userData.username,  // TODO remove
+  username: 'hartloff',
   stage0: {
     selectedCourse: null as Course | null,
   },
   stage1: {
     typedDisplayName: '',
+    sampleAssignments: [] as string[],
+    showingSampleGrade: false,
   },
   stage2: {
     displayName: '',
@@ -259,6 +278,63 @@ function loadCourses() {
     })
 }
 
+const sampleAssignmentNames = [
+  "Bug2",
+  "Genetic Algorithm",
+  "Physics Engine",
+  "Microwave",
+  "Calculator",
+  "Rhyming Dictionary",
+  "Maze Solver",
+  "Decision Tree",
+  "Clicker Game",
+  "Lab 2 - Part C",
+  "Lab Exam 4 - Part A",
+  "Project - Part 2",
+  "Lecture Question 6 - Reference Batteries",
+  "Lecture Question 2 - Polymorphic Electronics",
+  "Lecture Question 5 - Graph Connections",
+  "Lecture Question 3 - Traffic Actors",
+  "Final Exam",
+  "Run-Length Decoder",
+  "Conway's Game of Life",
+  "Priority Queue",
+  "Instant Messenger",
+  "Dynamic Allocator",
+  "Synchronization: Semaphores and Producer-Consumer Queues",
+  "Structured Matrix Vector Multiplication",
+  "Perfect Matching",
+  "Closest Pair of Points",
+  "RAFT Consensus",
+  "HTTP and Docker",
+  "Dynamic Site",
+  "Live Chat",
+  "Authentication",
+  "Report Checkpoint",
+  "Presentation"
+]
+
+function getRandomSampleAssignments(): string[] {
+  const numAssignments = Math.floor(Math.random() * 3) + 3
+  const assignments = [] as string[]
+  for (let i = 0; i < numAssignments; i++) {
+    let assignment = sampleAssignmentNames[Math.floor(Math.random() * sampleAssignmentNames.length)]
+    while (assignments.includes(assignment)) {
+      assignment = sampleAssignmentNames[Math.floor(Math.random() * sampleAssignmentNames.length)]
+    }
+    assignments.push(assignment)
+  }
+  return assignments
+}
+
+function updateSampleAssignments() {
+  state.stage1.sampleAssignments = getRandomSampleAssignments()
+}
+
+function toggleSampleGrade() {
+  state.stage1.showingSampleGrade = !state.stage1.showingSampleGrade
+}
+
 function scrollToTop() {
   window.scrollTo(0, 0)
 }
@@ -271,6 +347,8 @@ function moveToStage0() {
 
 function moveToStage1(course: Course) {
   scrollToTop()
+  state.stage1.showingSampleGrade = false
+  updateSampleAssignments()
   if (state.stage < 1) {
     // Only update the display name if moving forwards, keep their custom option if they go back
     state.stage1.typedDisplayName = course.suggestedName
@@ -333,3 +411,26 @@ function requestCreateCourse() {
 loadCourses()
 
 </script>
+
+<style scoped>
+
+/* Jump animation modified from https://stackoverflow.com/a/16883488 */
+.sampleGrade {
+  animation: springIn 1s forwards;
+}
+
+@keyframes springIn {
+  0% {
+    transform: translate(0, 0);
+    animation-timing-function: cubic-bezier(0.33333, 0.66667, 0.66667, 1)
+  }
+  69.0983% {
+    transform: translate(0, -250px);
+    animation-timing-function: cubic-bezier(0.33333, 0, 0.66667, 0.33333)
+  }
+  100% {
+    transform: translate(0, -190px);
+  }
+}
+
+</style>

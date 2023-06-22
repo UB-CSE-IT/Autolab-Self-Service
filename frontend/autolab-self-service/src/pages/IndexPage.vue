@@ -15,9 +15,6 @@
               Return to Autolab
             </div>
           </a>
-          <div class="element">
-            I wish there was something more fun to do than log out.
-          </div>
           <div class="actions">
             <form method="POST" action="/portal/api/logout/">
               <q-btn label="Log out" color="primary" flat type="submit"/>
