@@ -99,7 +99,8 @@ def my_courses(username: str):
     if professor is None:
         return jsonify({
             "success": False,
-            "error": "Instructor not found."
+            "error": f"{g.user.username} does not have any current or upcoming courses "
+                     f"where they're the primary instructor."
         }), 403
     return jsonify({
         "success": True,
@@ -153,6 +154,49 @@ def create_course():
             "location": f"https://autolab.cse.buffalo.edu/courses/{course.technical_name}",
         }
     })
+
+
+@app.api.route("/admin-update/", methods=["POST"])
+def admin_update():
+    # Checks if the user is an admin on Autolab. If so, make them an admin on the portal.
+    # If they're already an admin on the portal, remove their admin status.
+    if g.user is None:
+        return jsonify({
+            "success": False,
+            "error": "You are not logged in."
+        }), 401
+    if g.user.is_admin:
+        g.user.is_admin = False
+        g.db.commit()
+        return jsonify({
+            "success": True,
+            "isAdmin": False,
+            "message": "You were already an admin, so we removed your admin status on the portal. "
+                       "I guess you probably want to test something? You can always get it back by "
+                       "clicking the button again. You may need to refresh the page to see the change."
+        })
+    try:
+        is_autolab_admin = app.autolab.check_admin(g.user.email)
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": "Failed to check admin status on Autolab. " + str(e),
+        }), 500
+    if is_autolab_admin:
+        g.user.is_admin = True
+        g.db.commit()
+        return jsonify({
+            "success": True,
+            "isAdmin": True,
+            "message": "We verified you're an admin on Autolab! You are now an admin on the portal. "
+                       "You may need to refresh the page to see the change."
+        })
+    else:
+        return jsonify({
+            "success": False,
+            "error": "Haha nice try! Did you think it was that easy? You are not an admin on Autolab, "
+                     "so you can't be an admin here."
+        }), 403
 
 
 def initialize():

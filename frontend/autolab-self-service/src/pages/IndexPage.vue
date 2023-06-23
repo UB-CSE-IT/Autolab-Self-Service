@@ -11,7 +11,7 @@
             Everybody
           </div>
           <a href="https://autolab.cse.buffalo.edu/">
-            <div class="element" role="link" @click="navigate">
+            <div class="element" role="link">
               Return to Autolab
             </div>
           </a>
@@ -43,7 +43,7 @@
           <div class="header">
             Administrators
           </div>
-          <router-link :to="{name: 'create-course'}" v-slot="{ navigate }">
+          <router-link :to="{name: 'become-admin'}" v-slot="{ navigate }">
             <div class="element" role="link" @click="navigate">
               Become an administrator
             </div>

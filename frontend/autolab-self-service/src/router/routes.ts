@@ -14,6 +14,11 @@ const routes: RouteRecordRaw[] = [
         name: 'create-course',
         component: () => import('pages/CreateCoursePage.vue')
       },
+      {
+        path: 'become-admin',
+        name: 'become-admin',
+        component: () => import('pages/BecomeAdminPage.vue')
+      },
       // Always leave this as last one,
       // but you can also remove it
       {

@@ -175,3 +175,9 @@ class AutolabApiConnection:
                                       instructor_email: str) -> dict:
         start, end = get_start_and_end_dates_for_semester(semester)
         return self.create_course(course_name, display_name, semester, instructor_email, start, end)
+
+    def check_admin(self, email_address: str) -> bool:
+        params = {
+            "email": email_address
+        }
+        return self.make_api_request("GET", "/api/v1/admin_check", params).get("is_administrator", False)

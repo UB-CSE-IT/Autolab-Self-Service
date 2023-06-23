@@ -46,6 +46,10 @@ class User(Base):
             "isAdmin": self.is_admin,
         }
 
+    @property
+    def email(self):
+        return f"{self.username}@buffalo.edu"
+
     @staticmethod
     def get_by_username(username: str) -> "User":
         return g.db.query(User).filter(User.username == username).first()
