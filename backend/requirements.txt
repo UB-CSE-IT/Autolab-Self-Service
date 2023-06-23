@@ -6,3 +6,4 @@ alembic
 requests
 oracledb
 pytz
+gunicorn

@@ -155,12 +155,15 @@ def create_course():
     })
 
 
-def main():
+def initialize():
     # If, in the future, I want to use Alembic, remove this line:
     db.initialize()
     app.register_blueprint(app.api, url_prefix="/api")
-    app.run("0.0.0.0", 5057)
 
+
+initialize()
 
 if __name__ == '__main__':
-    main()
+    app.run("0.0.0.0", 5057)
+else:
+    gunicorn_app = app

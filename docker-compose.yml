@@ -1,0 +1,51 @@
+version: "3.3"
+
+services:
+  backend:
+    build: backend
+    restart: unless-stopped
+    environment:
+      - LD_LIBRARY_PATH=/oracle
+    # LD_LIBRARY_PATH needs to be defined here so it applies before Python starts
+    # Use backend/.env file for most variables
+    expose:
+      - "5057"
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=autolab
+      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_DB=autolabportal
+    # These ports should be commented out in production, but they're helpful during development
+    ports:
+      - "127.0.0.1:5432:5432"
+    expose:
+      - "5432"
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U autolab -d autolabportal" ]
+      interval: 3s
+      timeout: 5s
+      retries: 50
+  frontend-build:
+    build:
+      context: frontend
+      dockerfile: Dockerfile-build
+    volumes:
+      - ./frontend/autolab-self-service:/app
+  frontend:
+    build: frontend
+    restart: unless-stopped
+    depends_on:
+      frontend-build:
+        condition: service_completed_successfully
+    ports:
+      - "80:80"
+    volumes:
+      - ./data/frontend/logs:/var/log/nginx
+      - ./frontend/autolab-self-service/dist/spa:/usr/share/nginx/html
