@@ -2,4 +2,5 @@
 venv/
 backend/.env
 backend/refresh_token.txt
+backend/mount
 /data/

@@ -3,13 +3,13 @@ import requests
 
 
 def store_refresh_token(refresh_token: str):
-    with open("refresh_token.txt", "w") as f:
+    with open("mount/refresh_token.txt", "w") as f:
         f.write(refresh_token)
 
 
 def get_refresh_token_from_file() -> str:
     try:
-        with open("refresh_token.txt", "r") as f:
+        with open("mount/refresh_token.txt", "r") as f:
             return f.read()
     except FileNotFoundError:
         return ""

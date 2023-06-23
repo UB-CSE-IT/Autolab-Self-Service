@@ -13,6 +13,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - ./data/backend:/app/backend/mount
   db:
     image: postgres:15
     restart: unless-stopped
