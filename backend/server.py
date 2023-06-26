@@ -2,6 +2,7 @@ import os
 from flask import Flask, Blueprint, jsonify, request, make_response, g, redirect
 from dotenv import load_dotenv
 from backend import db
+from backend.PerUserRateLimiter import rate_limit_per_user
 from backend.connections.AutolabApiConnection import AutolabApiConnection
 from backend.connections.InfosourceConnection import InfoSourceConnection
 from backend.CourseStore import CourseStore
@@ -17,7 +18,7 @@ app.autolab = AutolabApiConnection(os.getenv("AUTOLAB_ROOT"), os.getenv("AUTOLAB
 app.infosource = InfoSourceConnection(os.getenv("INFOSOURCE_USERNAME"),
                                       os.getenv("INFOSOURCE_PASSWORD"), os.getenv("INFOSOURCE_DSN"))
 app.course_store = CourseStore(app.infosource)
-app.developer_mode = os.getenv("DEVELOPER_MODE").lower() == "true"
+app.developer_mode = os.getenv("DEVELOPER_MODE", "").lower() == "true"
 
 
 @app.api.before_request
@@ -102,6 +103,7 @@ def logout():
 
 
 @app.api.route("/userinfo/")
+# Cannot be rate limited because it is used to check if the user is logged in
 def userinfo():
     if g.user is None:
         return jsonify({
@@ -117,6 +119,7 @@ def userinfo():
 
 
 @app.api.route("/my-courses/<string:username>/")
+@rate_limit_per_user(5, 5)  # 5 request per 5 seconds. This one isn't very computationally expensive
 def my_courses(username: str):
     if g.user is None:
         return jsonify({
@@ -142,6 +145,7 @@ def my_courses(username: str):
 
 
 @app.api.route("/create-course/", methods=["POST"])
+@rate_limit_per_user(1, 5)  # 1 request per 5 seconds
 def create_course():
     if g.user is None:
         return jsonify({
@@ -190,6 +194,8 @@ def create_course():
 
 
 @app.api.route("/admin-update/", methods=["POST"])
+@rate_limit_per_user(10, 60)  # 10 requests per minute
+@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
 def admin_update():
     # Checks if the user is an admin on Autolab. If so, make them an admin on the portal.
     # If they're already an admin on the portal, remove their admin status.
