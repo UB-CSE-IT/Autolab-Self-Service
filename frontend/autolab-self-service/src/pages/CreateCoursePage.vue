@@ -17,8 +17,9 @@
             </q-input>
           </q-form>
         </div>
-        <div v-if="state.loadingCourses">
-          Loading...
+        <div v-if="state.loadingCourses" class="column content-center">
+          <q-spinner-hourglass color="primary" size="100px"/>
+          <p>Loading courses...</p>
         </div>
         <div v-else-if="state.errorLoadingCourses">
           Error loading courses: {{ state.errorMessage }}

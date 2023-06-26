@@ -22,7 +22,7 @@
     <q-btn label="Sync admin status!" color="primary" @click="syncAdminStatus"/>
 
     <div v-if="state.loading">
-      <q-spinner-pie class="q-mt-lg" size="100"/>
+      <q-spinner-pie class="q-mt-lg" color="primary" size="100"/>
     </div>
     <div v-else-if="state.error">
       <h4 class="text-red">
