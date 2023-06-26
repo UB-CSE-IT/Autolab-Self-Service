@@ -11,12 +11,12 @@ class PerUserRateLimiter:
         # To limit to 5 requests per 10 seconds, use RateLimiter(5, 10)
         self.times_per_period = times_per_period
         self.seconds = seconds
-        self.__users: Dict[str, deque[datetime]] = {}
+        self.__users: Dict[str, deque] = {}
 
     def __repr__(self):
         return f"<RateLimiter {self.times_per_period} times per {self.seconds} seconds>"
 
-    def update_to_current_time(self, current_time: datetime, user_queue: deque[datetime]):
+    def update_to_current_time(self, current_time: datetime, user_queue: deque):
         # Gets a given queue into the correct state for the current time to begin checks
         # Removes all access times that are older than the current time minus the period
         # Pass a current time so that the time used is consistent across all methods
