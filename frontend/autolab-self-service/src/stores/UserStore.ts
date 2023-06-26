@@ -7,6 +7,7 @@ export const useUserStore = defineStore('user-store', {
       loggedIn: false,
       userData: {} as UserData,
       userDataLoading: false,
+      developerMode: false
     }
   },
   actions: {
@@ -19,6 +20,8 @@ export const useUserStore = defineStore('user-store', {
             this.userData = res.data
             this.loggedIn = true
           }
+          // Developer mode is returned regardless of success
+          this.developerMode = res.developerMode
         })
         .catch(() => {
           this.userData = null as unknown as UserData

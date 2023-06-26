@@ -47,7 +47,7 @@ services:
       frontend-build:
         condition: service_completed_successfully
     ports:
-      - "80:80"
+      - "127.0.0.1:82:80"
     volumes:
       - ./data/frontend/logs:/var/log/nginx
       - ./frontend/autolab-self-service/dist/spa:/usr/share/nginx/html

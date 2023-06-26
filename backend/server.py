@@ -17,6 +17,7 @@ app.autolab = AutolabApiConnection(os.getenv("AUTOLAB_ROOT"), os.getenv("AUTOLAB
 app.infosource = InfoSourceConnection(os.getenv("INFOSOURCE_USERNAME"),
                                       os.getenv("INFOSOURCE_PASSWORD"), os.getenv("INFOSOURCE_DSN"))
 app.course_store = CourseStore(app.infosource)
+app.developer_mode = os.getenv("DEVELOPER_MODE").lower() == "true"
 
 
 @app.api.before_request
@@ -59,6 +60,36 @@ def login():
     return resp
 
 
+@app.api.route("/login/dev/", methods=["POST"])
+def dev_login():
+    if not app.developer_mode:
+        return jsonify({
+            "success": False,
+            "error": "Developer mode is not enabled."
+        }), 403
+
+    username = request.form.get("username")
+    user_data = app.infosource.get_person_info_by_username(username)
+    if user_data is None:
+        return jsonify({
+            "success": False,
+            "error": "User does not exist."
+        }), 404
+
+    first_name = user_data["FIRST_NAME"]
+    last_name = user_data["LAST_NAME"]
+    person_number = user_data["PERSON_NUMBER"]
+
+    # Set the headers as if they came from Shibboleth to pass to the regular login
+    request.headers.environ["HTTP_UID"] = username
+    request.headers.environ["HTTP_PN"] = person_number
+    request.headers.environ["HTTP_GIVENNAME"] = first_name
+    request.headers.environ["HTTP_SN"] = last_name
+
+    # Call the regular login
+    return login()
+
+
 @app.api.route("/logout/", methods=["POST"])
 def logout():
     session_cookie = request.cookies.get("ubcse_autolab_portal_session", "")
@@ -75,11 +106,13 @@ def userinfo():
     if g.user is None:
         return jsonify({
             "success": False,
-            "error": "You are not logged in."
+            "error": "You are not logged in.",
+            "developerMode": app.developer_mode,
         }), 401
     return jsonify({
         "success": True,
-        "data": g.user.to_dict()
+        "data": g.user.to_dict(),
+        "developerMode": app.developer_mode,
     })
 
 

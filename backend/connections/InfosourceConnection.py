@@ -60,3 +60,17 @@ class InfoSourceConnection:
             info.rowfactory = lambda *args: Course(*args)
             rows = info.fetchall()
             return rows
+
+    def get_person_info_by_username(self, username: str):
+        stmt = """ \
+            SELECT FIRST_NAME, LAST_NAME, PERSON_NUMBER, PRINCIPAL AS USERNAME
+            FROM DCE.PERSON_NUMBER
+                 JOIN PS_RPT.UB_DISPLAY_NAME_V ON DCE.PERSON_NUMBER.PERSON_NUMBER = PS_RPT.UB_DISPLAY_NAME_V.EMPLID
+            WHERE PRINCIPAL = :username
+        """
+        with self as info:
+            info.execute(stmt, username=username)
+            # Based on https://stackoverflow.com/a/57108771
+            info.rowfactory = lambda *args: dict(zip([d[0] for d in info.description], args))
+            result = info.fetchone()
+            return result
