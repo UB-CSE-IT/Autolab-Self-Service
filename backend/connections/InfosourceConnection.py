@@ -1,17 +1,22 @@
+import logging
 from typing import List
 import oracledb
 
 from backend.connections.Course import Course
 
+logger = logging.getLogger("portal")
+
 
 class InfoSourceConnection:
     def __init__(self, username: str, password: str, dsn: str):
+        logger.debug(f"Connecting to InfoSource database {dsn} as {username}")
         self.username = username
         self.password = password
         self.dsn = dsn
         self.con = None
         self.cursor = None
         oracledb.init_oracle_client()
+        logger.debug("Successfully connected to InfoSource database")
 
     def __enter__(self):
         self.con = oracledb.connect(user=self.username, password=self.password, dsn=self.dsn)
@@ -25,6 +30,7 @@ class InfoSourceConnection:
         self.con = None
 
     def query_all_courses(self) -> List[Course]:
+        logger.debug("Querying all courses from InfoSource database")
         stmt = """ \
             SELECT SUBJECTSOURCEKEY,
                 SUBSTR(CATALOGNUMBERSOURCEKEY, 1, 3) as COURSENUMBER,
@@ -62,6 +68,7 @@ class InfoSourceConnection:
             return rows
 
     def get_person_info_by_username(self, username: str):
+        logger.debug(f"Querying person info for {username} from InfoSource database")
         stmt = """ \
             SELECT FIRST_NAME, LAST_NAME, PERSON_NUMBER, PRINCIPAL AS USERNAME
             FROM DCE.PERSON_NUMBER

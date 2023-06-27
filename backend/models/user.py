@@ -1,7 +1,11 @@
+import logging
+
 from flask import g
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, func
 from sqlalchemy.orm import relationship
 from backend.db import Base
+
+logger = logging.getLogger("portal")
 
 
 class User(Base):
@@ -31,11 +35,13 @@ class User(Base):
         )
         g.db.add(u)
         g.db.commit()
+        logger.info(f"Created new user {u.to_dict()}")
         return u
 
     def login(self):
         self.login_count += 1
         self.last_login = func.now()
+        logger.info(f"User {self.username} logged in. This is their login number {self.login_count}")
         g.db.commit()
 
     def to_dict(self):
@@ -52,4 +58,5 @@ class User(Base):
 
     @staticmethod
     def get_by_username(username: str) -> "User":
+        logger.debug(f"Getting user by username {username}")
         return g.db.query(User).filter(User.username == username).first()

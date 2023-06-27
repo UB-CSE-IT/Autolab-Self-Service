@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from threading import Lock
 from typing import List, Dict
@@ -5,6 +6,8 @@ from typing import List, Dict
 from backend.connections.Course import Course
 from backend.connections.InfosourceConnection import InfoSourceConnection
 from backend.connections.Instructor import Instructor
+
+logger = logging.getLogger("portal")
 
 
 class CourseStore:
@@ -18,7 +21,7 @@ class CourseStore:
         self.updating_lock = Lock()
 
     def update_from_database(self):
-        print("Updating course store from database")
+        logger.info("Updating course store from InfoSource database")
         courses: List[Course] = self.infosource.query_all_courses()
 
         crosslisted_courses: Dict[str, List[Course]] = {}  # crosslisted_identifier -> List[Course]
@@ -70,16 +73,19 @@ class CourseStore:
                 self.last_updated = datetime.now()
 
     def get_courses(self) -> List[Course]:
+        logger.debug("Getting courses")
         # Get courses, read from local cache if fresh enough
         self.update_if_necessary()
         return self.courses_cache
 
     def get_professors(self) -> Dict[str, Instructor]:
+        logger.debug("Getting professors")
         # Get professors, read from local cache if fresh enough
         self.update_if_necessary()
         return self.instructors_cache
 
     def get_by_unique_identifier(self, unique_id: str):
+        logger.debug(f"Getting course by unique identifier {unique_id}")
         # Get course by unique identifier, read from local cache if fresh enough
         self.update_if_necessary()
         for course in self.courses_cache:

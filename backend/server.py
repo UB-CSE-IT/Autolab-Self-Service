@@ -12,7 +12,7 @@ from backend.db import get_db_session
 from backend.models.session import Session
 from backend.models.user import User
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("portal")
 load_dotenv()
 app = Flask(__name__)
 app.request_counter = 0
@@ -34,25 +34,25 @@ def init_logging():
             # Tag each log message with the request ID since they can be concurrent
             try:
                 record.request_id = str(g.request_number)
-            except AttributeError:
+            except (AttributeError, RuntimeError):
                 record.request_id = "------"  # This length matches the padding of 6 below to avoid prefixing it with 0s
             record.request_id = f"R#{record.request_id.rjust(6, '0')}".rjust(8)
 
             # Indent all log messages except the first one in a request
             try:
                 record.indent = g.request_initiated * "    "
-            except AttributeError:
+            except (AttributeError, RuntimeError):
                 record.indent = ""
             return True
 
     os.makedirs("mount/logs", exist_ok=True)
     logger.setLevel(logging.DEBUG if app.developer_mode else logging.INFO)
     handler = RotatingFileHandler("mount/logs/portal.log", maxBytes=10_000_000, backupCount=5_000)
-    formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(request_id)s%(indent)s %(message)s")
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(request_id)s%(indent)s %(message)s (%(module)s)")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.addFilter(RequestContextFilter())
-    logger.debug("Logging initialized.")
+    logger.debug("Logging initialized")
 
 
 @app.api.before_request
@@ -73,6 +73,8 @@ def before_request():
 @app.api.after_request
 def after_request(response):
     g.db.close()
+    if response.json and response.json.get("error"):
+        logger.info(f"Error: {response.json['error']}")
     logger.info(f"Finished request #{g.request_number} with status {response.status}")
     return response
 
@@ -84,6 +86,8 @@ def login():
     first_name = request.headers.get("Givenname")
     last_name = request.headers.get("Sn")
     if not all([username, person_number, first_name, last_name]):
+        logger.warning(f"Missing required headers from Shibboleth. In production, there's either a misconfiguration or "
+                       f"a user is accessing portal directly, which would be a security issue.")
         return jsonify({
             "success": False,
             "error": "Missing required headers from Shibboleth."
@@ -94,6 +98,7 @@ def login():
     user.login()
     if user.first_name != first_name or user.last_name != last_name:
         # Update the user's name if it has changed
+        logger.info(f"Updating user {user.username} with new name from Shibboleth {first_name} {last_name}")
         user.first_name = first_name
         user.last_name = last_name
         g.db.commit()
@@ -101,12 +106,14 @@ def login():
     resp = make_response(redirect("/portal"))
     resp.set_cookie("ubcse_autolab_portal_session", token, samesite="Strict", secure=True, httponly=True,
                     max_age=1735707600)
+    logger.info(f"User {user.username} logged in successfully")
     return resp
 
 
 @app.api.route("/login/dev/", methods=["POST"])
 def dev_login():
     if not app.developer_mode:
+        logger.warning(f"Attempted to use developer login when developer mode is not enabled")
         return jsonify({
             "success": False,
             "error": "Developer mode is not enabled."
@@ -131,6 +138,7 @@ def dev_login():
     request.headers.environ["HTTP_SN"] = last_name
 
     # Call the regular login
+    logger.info(f"Developer login for {username} initiated. Passing through to regular login.")
     return login()
 
 
@@ -174,13 +182,18 @@ def my_courses(username: str):
             "success": False,
             "error": "You only authorized to view your own courses."
         }), 403
-    professor = app.course_store.get_professors().get(username)
+    professors = app.course_store.get_professors()
+    logger.debug(f"Found {len(professors)} professors")
+    logger.debug(f"Looking for {username}")
+    professor = professors.get(username)
     if professor is None:
+        logger.info(f"Could not find {username} in the list of professors")
         return jsonify({
             "success": False,
-            "error": f"{g.user.username} does not have any current or upcoming courses "
+            "error": f"{username} does not have any current or upcoming courses "
                      f"where they're the primary instructor."
-        }), 403
+        }), 404
+    logger.info(f"Found {len(professor.courses)} courses for {username}")
     return jsonify({
         "success": True,
         "data": professor.to_dict()
@@ -250,6 +263,7 @@ def admin_update():
     if g.user.is_admin:
         g.user.is_admin = False
         g.db.commit()
+        logger.info(f"User {g.user.username} is no longer an admin on the portal")
         return jsonify({
             "success": True,
             "isAdmin": False,
@@ -267,6 +281,7 @@ def admin_update():
     if is_autolab_admin:
         g.user.is_admin = True
         g.db.commit()
+        logger.info(f"User {g.user.username} is now an admin on the portal")
         return jsonify({
             "success": True,
             "isAdmin": True,
@@ -292,6 +307,8 @@ def initialize():
 initialize()
 
 if __name__ == '__main__':
+    logger.info("Initializing Flask development server")
     app.run("0.0.0.0", 5057)
 else:
+    logger.info("Initializing Gunicorn production server")
     gunicorn_app = app

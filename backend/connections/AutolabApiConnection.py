@@ -1,5 +1,8 @@
+import logging
 import time
 import requests
+
+logger = logging.getLogger("portal")
 
 
 def store_refresh_token(refresh_token: str):
@@ -46,7 +49,7 @@ class AutolabApiConnection:
         self.__access_token = None
 
         if get_refresh_token_from_file() == "":
-            print("No refresh token found, starting initial setup.")
+            logger.warning("No refresh token found, starting initial setup")
             self.__initial_setup()
         self.__get_new_access_token()
 
@@ -60,6 +63,7 @@ class AutolabApiConnection:
         # {'device_code': 'abcd...',
         # 'user_code': 'abcd12',
         # 'verification_uri': 'http://localhost:81/activate'}
+        logger.debug("Initiating OAuth device flow")
         url = f"{self.__path}/oauth/device_flow_init"
         params = {
             "client_id": self.__client_id,
@@ -72,6 +76,7 @@ class AutolabApiConnection:
         # Uses the device_code from __device_flow_init
         # Returns a dict like:
         # {'code': 'fwM3PgwYfFd5S87b8HcSJrploQFHpoAj1ef3ME_FfmI'}
+        logger.debug("Waiting for user to authorize device flow")
         url = f"{self.__path}/oauth/device_flow_authorize"
         params = {
             "client_id": self.__client_id,
@@ -92,6 +97,7 @@ class AutolabApiConnection:
         #  'refresh_token':'efgh...',
         #  'scope': 'user_info user_courses user_scores user_submit instructor_all admin_all',
         #  'created_at': 1686757109}
+        logger.debug("Getting initial refresh token")
         params = {
             "code": auth_code,
             "grant_type": "authorization_code",
@@ -115,6 +121,7 @@ class AutolabApiConnection:
         #  'created_at': 1686760138}
         # Also updates the refresh token on disk with the new one received
         #  - important because the old one is invalidated
+        logger.debug("Getting new access token")
         url = f"{self.__path}/oauth/token"
         params = {
             "grant_type": "refresh_token",
@@ -129,6 +136,7 @@ class AutolabApiConnection:
 
     def __initial_setup(self):
         device_flow_init_resp = self.__device_flow_init()
+        logger.info("Starting initial OAuth setup. This sensitive information will not be logged here. See stdout.")
         print(f"{device_flow_init_resp=}")
         device_flow_authorize_response = self.__device_flow_authorize(device_flow_init_resp["device_code"])
         print(f"{device_flow_authorize_response=}")
@@ -136,6 +144,7 @@ class AutolabApiConnection:
         initial_refresh_token_resp = self.__get_initial_refresh_token(auth_code)
         print(f"{initial_refresh_token_resp=}")
         store_refresh_token(initial_refresh_token_resp["refresh_token"])
+        logger.info("Initial OAuth setup complete")
 
     def make_api_request(self, method: str, path: str, params: dict, retry: bool = False) -> dict:
         # Makes a request to the Autolab API
@@ -146,17 +155,22 @@ class AutolabApiConnection:
         # Returns the response as a dict and handles refreshing the access token if needed
         # Raises an exception if the request fails even after refreshing the access token
         url = f"{self.__path}{path}"
+        logger.debug(f"Making API request to {method} {url} with params: {params} ({retry=})")
         params["access_token"] = self.__access_token
         r = requests.request(method, url, params=params)
         if r.status_code != 200:
+            logger.debug(f"API request failed with status code {r.status_code}")
             if not retry:
+                logger.debug("Trying again after getting a new access token")
                 self.__get_new_access_token()
+                del params["access_token"]
                 return self.make_api_request(method, path, params, retry=True)
-            print(f"Request failed even after getting a new access token with status code {r.status_code}")
+            logger.error(f"API request failed even after getting a new access token with status code {r.status_code}")
             message = "Response: " + r.text
-            print(message)
+            logger.error(message)
             raise Exception(message)
         else:
+            logger.debug(f"API request succeeded. Returned {r.json()}")
             return r.json()
 
     def create_course(self, course_name: str, display_name: str, semester: str, instructor_email: str,
@@ -169,14 +183,18 @@ class AutolabApiConnection:
             "start_date": start_date,
             "end_date": end_date
         }
+        logger.info(f"Creating course {course_name} with params: {params}")
         return self.make_api_request("POST", "/api/v1/courses", params)
 
     def create_course_automatic_dates(self, course_name: str, display_name: str, semester: str,
                                       instructor_email: str) -> dict:
+        logger.debug(f"Creating course {course_name} with automatic dates")
         start, end = get_start_and_end_dates_for_semester(semester)
+        logger.debug(f"Calculated start date {start} and end date {end} for semester {semester}")
         return self.create_course(course_name, display_name, semester, instructor_email, start, end)
 
     def check_admin(self, email_address: str) -> bool:
+        logger.info(f"Checking if {email_address} is an admin")
         params = {
             "email": email_address
         }
