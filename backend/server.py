@@ -1,4 +1,6 @@
+import logging
 import os
+from logging.handlers import RotatingFileHandler
 from flask import Flask, Blueprint, jsonify, request, make_response, g, redirect
 from dotenv import load_dotenv
 from backend import db
@@ -10,8 +12,10 @@ from backend.db import get_db_session
 from backend.models.session import Session
 from backend.models.user import User
 
+logger = logging.getLogger(__name__)
 load_dotenv()
 app = Flask(__name__)
+app.request_counter = 0
 app.api = Blueprint("api", __name__)
 app.autolab = AutolabApiConnection(os.getenv("AUTOLAB_ROOT"), os.getenv("AUTOLAB_CLIENT_ID"),
                                    os.getenv("AUTOLAB_CLIENT_SECRET"), os.getenv("AUTOLAB_CLIENT_CALLBACK"))
@@ -21,16 +25,55 @@ app.course_store = CourseStore(app.infosource)
 app.developer_mode = os.getenv("DEVELOPER_MODE", "").lower() == "true"
 
 
+def init_logging():
+    class RequestContextFilter(logging.Filter):
+        def filter(self, record: logging.LogRecord) -> bool:
+            # Pad the level name for consistent indentation
+            record.levelname = f"[{record.levelname}]".rjust(10)
+
+            # Tag each log message with the request ID since they can be concurrent
+            try:
+                record.request_id = str(g.request_number)
+            except AttributeError:
+                record.request_id = "------"  # This length matches the padding of 6 below to avoid prefixing it with 0s
+            record.request_id = f"R#{record.request_id.rjust(6, '0')}".rjust(8)
+
+            # Indent all log messages except the first one in a request
+            try:
+                record.indent = g.request_initiated * "    "
+            except AttributeError:
+                record.indent = ""
+            return True
+
+    os.makedirs("mount/logs", exist_ok=True)
+    logger.setLevel(logging.DEBUG if app.developer_mode else logging.INFO)
+    handler = RotatingFileHandler("mount/logs/portal.log", maxBytes=10_000_000, backupCount=5_000)
+    formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(request_id)s%(indent)s %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.addFilter(RequestContextFilter())
+    logger.debug("Logging initialized.")
+
+
 @app.api.before_request
 def before_request():
+    app.request_counter += 1
+    g.request_initiated = False
+    g.request_number = app.request_counter
     g.db = get_db_session()
     session_cookie = request.cookies.get("ubcse_autolab_portal_session", "")
     g.user = Session.get_user(session_cookie)
+    logger.info(
+        f"Beginning request #{g.request_number} {request.method} {request.path} "
+        f"from {g.user.username if g.user else '(unknown user)'} "
+        f"at {request.remote_addr}")
+    g.request_initiated = True
 
 
 @app.api.after_request
 def after_request(response):
     g.db.close()
+    logger.info(f"Finished request #{g.request_number} with status {response.status}")
     return response
 
 
@@ -239,6 +282,8 @@ def admin_update():
 
 
 def initialize():
+    with app.app_context():
+        init_logging()
     # If, in the future, I want to use Alembic, remove this line:
     db.initialize()
     app.register_blueprint(app.api, url_prefix="/api")
