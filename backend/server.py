@@ -11,6 +11,7 @@ from backend.CourseStore import CourseStore
 from backend.db import get_db_session
 from backend.models.session import Session
 from backend.models.user import User
+from backend.utils import get_client_ip
 
 logger = logging.getLogger("portal")
 load_dotenv()
@@ -66,7 +67,7 @@ def before_request():
     logger.info(
         f"Beginning request #{g.request_number} {request.method} {request.path} "
         f"from {g.user.username if g.user else '(unknown user)'} "
-        f"at {request.remote_addr}")
+        f"at {get_client_ip(request)}")
     g.request_initiated = True
 
 
