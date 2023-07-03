@@ -160,6 +160,8 @@ class AutolabApiConnection:
         r = requests.request(method, url, params=params)
         if r.status_code != 200:
             logger.debug(f"API request failed with status code {r.status_code}")
+            if r.status_code == 429:
+                raise Exception("Autolab API rate limit exceeded. Try again in a few seconds.")
             if not retry:
                 logger.debug("Trying again after getting a new access token")
                 self.__get_new_access_token()
