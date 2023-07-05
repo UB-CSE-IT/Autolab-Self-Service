@@ -191,21 +191,24 @@
         <div class="" v-else>
           <q-btn icon="west" label="Back to portal home" color="primary" to="/"/>
           <div class="column items-center content-center">
-            <h4 class="q-mb-lg">Success!</h4>
+            <h4 class="q-mb-none">Success!</h4>
+            <img class="q-ma-md q-mb-lg" src="/portal/icons/autolab.svg" height="100" alt="Autolab Logo"/>
             <p>Your course has been created on Autolab!</p>
-            <img class="q-ma-md" src="/portal/icons/autolab.svg" height="100" alt="Autolab Logo"/>
-            <p class="q-mt-md">You can add additional instructors and import your student roster from the course
+            <p>You can add additional instructors and import your student roster from the course
               page.</p>
-            <q-btn class="q-mt-md" icon-right="outbound" target="_blank" :href="state.stage3.response?.location"
-                   label="Go to course page"
-                   color="primary"/>
+            <div class="row justify-center">
+              <q-btn class="q-ma-md" icon="add_box" label="Create another" color="primary" @click="moveToStage0"/>
+              <q-btn class="q-ma-md" icon-right="outbound" target="_blank" :href="state.stage3.response?.location"
+                     label="Go to course page"
+                     color="primary"/>
+            </div>
           </div>
-          <q-expansion-item
-            class="q-ma-xl"
-            icon="info"
-            label="More information">
-            <p>Server response: {{ state.stage3.response }}</p>
-          </q-expansion-item>
+<!--          <q-expansion-item-->
+<!--            class="q-ma-xl"-->
+<!--            icon="info"-->
+<!--            label="More information">-->
+<!--            <p>Server response: {{ state.stage3.response }}</p>-->
+<!--          </q-expansion-item>-->
         </div>
       </div>
     </div>
