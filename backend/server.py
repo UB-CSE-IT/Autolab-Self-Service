@@ -1,13 +1,14 @@
 import logging
 import os
 from logging.handlers import RotatingFileHandler
-from flask import Flask, Blueprint, jsonify, request, make_response, g, redirect
+from flask import Flask, Blueprint, jsonify, request, make_response, g, redirect, abort
 from dotenv import load_dotenv
 from backend import db
 from backend.PerUserRateLimiter import rate_limit_per_user
 from backend.connections.AutolabApiConnection import AutolabApiConnection
 from backend.connections.InfosourceConnection import InfoSourceConnection
 from backend.CourseStore import CourseStore
+from backend.connections.TangoApiConnection import TangoApiConnection
 from backend.db import get_db_session
 from backend.models.session import Session
 from backend.models.user import User
@@ -18,8 +19,10 @@ load_dotenv()
 app = Flask(__name__)
 app.request_counter = 0
 app.api = Blueprint("api", __name__)
+app.user_api = Blueprint("user_api", __name__)
 app.autolab = AutolabApiConnection(os.getenv("AUTOLAB_ROOT"), os.getenv("AUTOLAB_CLIENT_ID"),
                                    os.getenv("AUTOLAB_CLIENT_SECRET"), os.getenv("AUTOLAB_CLIENT_CALLBACK"))
+app.tango = TangoApiConnection(os.getenv("TANGO_HOST"), os.getenv("TANGO_KEY"), float(os.getenv("TANGO_MAX_POLL_RATE")))
 app.infosource = InfoSourceConnection(os.getenv("INFOSOURCE_USERNAME"),
                                       os.getenv("INFOSOURCE_PASSWORD"), os.getenv("INFOSOURCE_DSN"))
 app.course_store = CourseStore(app.infosource)
@@ -297,12 +300,42 @@ def admin_update():
         }), 403
 
 
+@app.user_api.before_request
+def user_api_before_request():
+    app.request_counter += 1
+    g.request_initiated = False
+    g.request_number = app.request_counter
+    if request.headers.get("Authorization", None) != os.getenv("USER_API_KEY"):
+        abort(403)
+    g.db = get_db_session()
+    logger.debug(
+        f"Beginning request #{g.request_number} {request.method} {request.path} "
+        f"from USER API "
+        f"at {get_client_ip(request)}")
+    g.request_initiated = True
+
+
+@app.user_api.after_request
+def user_api_after_request(response):
+    if hasattr(g, "db"):
+        # If the request was aborted, the db session won't exist
+        g.db.close()
+    logger.debug(f"Finished request #{g.request_number} with status {response.status}")
+    return response
+
+
+@app.user_api.route("/tango_histogram/", methods=["GET"])
+def tango_histogram():
+    return jsonify(app.tango.get_recent_submissions_histogram())
+
+
 def initialize():
     with app.app_context():
         init_logging()
     # If, in the future, I want to use Alembic, remove this line:
     db.initialize()
     app.register_blueprint(app.api, url_prefix="/api")
+    app.register_blueprint(app.user_api, url_prefix="/api/user_api")
 
 
 initialize()
