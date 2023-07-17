@@ -10,12 +10,13 @@
           <div class="header">
             Everybody
           </div>
-          <a href="https://autolab.cse.buffalo.edu/">
-            <div class="element" role="link">
-              Return to Autolab
+          <router-link :to="{name: 'tango-statistics'}" v-slot="{ navigate }">
+            <div class="element" role="link" @click="navigate">
+              View Tango statistics
             </div>
-          </a>
+          </router-link>
           <div class="actions">
+            <q-btn href="https://autolab.cse.buffalo.edu/" label="Return to Autolab" color="primary" flat/>
             <form method="POST" action="/portal/api/logout/">
               <q-btn label="Log out" color="primary" flat type="submit"/>
             </form>

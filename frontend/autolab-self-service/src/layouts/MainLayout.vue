@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import {useUserStore} from 'stores/UserStore';
-import 'assets/portal.scss'
+import 'src/css/portal.scss'
 import {computed} from "vue";
 import LoginPanel from "layouts/LoginPanel.vue";
 

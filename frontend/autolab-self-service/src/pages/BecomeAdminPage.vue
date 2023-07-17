@@ -52,8 +52,6 @@ import {useRouter} from "vue-router";
 const userStore = useUserStore()
 const router = useRouter()
 
-// Stage 0 is picking the course, 1 is choosing the name, 2 is the final confirmation, 3 is after confirmation
-
 const state = reactive({
   loading: false,
   error: false,

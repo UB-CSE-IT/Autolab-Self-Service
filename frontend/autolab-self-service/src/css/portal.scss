@@ -37,9 +37,17 @@
 
 .autolab-card > .actions {
   padding: 10px;
+  display: flex;
 }
 
 a {
   color: $primary;
   text-decoration: none;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 10px;
+  column-gap: 10px;
 }

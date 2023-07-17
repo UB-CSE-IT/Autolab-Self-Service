@@ -19,6 +19,11 @@ const routes: RouteRecordRaw[] = [
         name: 'become-admin',
         component: () => import('pages/BecomeAdminPage.vue')
       },
+      {
+        path: 'tango-statistics',
+        name: 'tango-statistics',
+        component: () => import('pages/TangoStatsPage.vue')
+      },
       // Always leave this as last one,
       // but you can also remove it
       {

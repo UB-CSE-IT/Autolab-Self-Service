@@ -300,6 +300,24 @@ def admin_update():
         }), 403
 
 
+@app.api.route("/tango-stats/")
+@rate_limit_per_user(2, 5)
+def tango_stats():
+    if g.user is None:
+        return jsonify({
+            "success": False,
+            "error": "You are not logged in."
+        }), 401
+    histogram = app.tango.get_recent_submissions_histogram()
+    stats = TangoApiConnection.annotate_time_histogram(histogram)
+    arr = list(stats.values())
+    arr.sort(key=lambda x: x["seconds"])
+    return jsonify({
+        "success": True,
+        "data": arr
+    })
+
+
 @app.user_api.before_request
 def user_api_before_request():
     app.request_counter += 1

@@ -1,5 +1,6 @@
 import datetime
 import logging
+import math
 import threading
 from typing import List
 
@@ -69,3 +70,34 @@ class TangoApiConnection:
                     histogram[seconds] += 1
 
         return histogram
+
+    @staticmethod
+    def annotate_time_histogram(histogram: dict[int, int]) -> dict[int, dict[str, any]]:
+        # Annotate the histogram with a human-readable amount of time
+        max_submissions = max(histogram.values())
+        annotated_histogram: dict[int, dict[str, any]] = {}
+        for seconds, submission_count in histogram.items():
+            count = seconds
+            unit = "second"
+            if count >= 60:
+                count /= 60
+                unit = "minute"
+                if count >= 60:
+                    count /= 60
+                    unit = "hour"
+                    if count >= 24:
+                        count /= 24
+                        unit = "day"
+            if count != 1:
+                unit += "s"
+
+            annotated_histogram[seconds] = {
+                "count": submission_count,
+                "timeframe": f"{int(count)} {unit}",
+                "sentence": f"{submission_count} submission{'s' if submission_count != 1 else ''} "
+                            f"in the past {int(count)} {unit}",
+                "percent": math.ceil(submission_count / max_submissions * 100),
+                "seconds": seconds,
+            }
+
+        return annotated_histogram
