@@ -83,6 +83,14 @@ def after_request(response):
     return response
 
 
+@app.errorhandler(500)
+def internal_server_error(e):
+    return jsonify({
+        "success": False,
+        "error": "Internal server error"
+    }), 500
+
+
 @app.api.route("/login/", methods=["GET", "POST"])
 def login():
     username = request.headers.get("Uid")
