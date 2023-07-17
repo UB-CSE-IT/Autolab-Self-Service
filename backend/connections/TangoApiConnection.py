@@ -2,7 +2,7 @@ import datetime
 import logging
 import math
 import threading
-from typing import List
+from typing import List, Dict
 
 import requests
 
@@ -52,7 +52,7 @@ class TangoApiConnection:
                 pass  # Just ignore this job. I don't know why it wouldn't have an entry, but it's not important.
         return start_times
 
-    def get_recent_submissions_histogram(self) -> dict[int, int]:
+    def get_recent_submissions_histogram(self) -> Dict[int, int]:
         # Return a dict of seconds to number of submissions within the past key seconds
         # It's technically a cumulative histogram, not a regular one.
 
@@ -61,7 +61,7 @@ class TangoApiConnection:
         sample_seconds = [1, 2, 3, 5, 10, 15, 20, 30, 60, 120, 300, 600, 1800, 3600, 7200, 14400, 28800, 57600, 86400,
                           172800, 259200, 345600, 432000, 518400, 604800, 1209600, 2592000]
 
-        histogram: dict[int, int] = {k: 0 for k in sample_seconds}
+        histogram: Dict[int, int] = {k: 0 for k in sample_seconds}
 
         for date in submission_dates:
             seconds_ago: float = (now - date).total_seconds()
@@ -72,10 +72,10 @@ class TangoApiConnection:
         return histogram
 
     @staticmethod
-    def annotate_time_histogram(histogram: dict[int, int]) -> dict[int, dict[str, any]]:
+    def annotate_time_histogram(histogram: Dict[int, int]) -> Dict[int, Dict[str, any]]:
         # Annotate the histogram with a human-readable amount of time
         max_submissions = max(histogram.values())
-        annotated_histogram: dict[int, dict[str, any]] = {}
+        annotated_histogram: Dict[int, Dict[str, any]] = {}
         for seconds, submission_count in histogram.items():
             count = seconds
             unit = "second"
