@@ -290,13 +290,15 @@ def admin_update():
             "success": True,
             "isAdmin": True,
             "message": "We verified you're an admin on Autolab! You are now an admin on the portal. "
-                       "You may need to refresh the page to see the change."
+                       "You may (but probably don't) need to refresh the page to see the change."
         })
     else:
         return jsonify({
             "success": False,
-            "error": "Haha nice try! Did you think it was that easy? You are not an admin on Autolab, "
-                     "so you can't be an admin here."
+            "error": f"<b>{g.user.username} is not in the sudoers file. This incident will be reported.</b> Haha, just "
+                     f"kidding; it won't be reported‡. But seriously, since you're not an administrator on Autolab, "
+                     f"we can't make you an administrator on the portal. Contact CSE IT if you believe this is an "
+                     f"error. Otherwise, I appreciate your curiosity. <br><br>‡ But it <i>has</i> been logged :)"
         }), 403
 
 

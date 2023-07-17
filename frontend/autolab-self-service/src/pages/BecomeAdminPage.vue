@@ -29,7 +29,7 @@
         <q-icon name="sentiment_dissatisfied"/>
         Admin Sync Failed!
       </h4>
-      <p>{{ state.message }}</p>
+      <p v-html="state.message"/>
     </div>
     <div v-else-if="state.success">
       <h4 class="text-green">
@@ -38,7 +38,6 @@
       </h4>
       <p>{{ state.message }}</p>
     </div>
-
 
     <div style="height: 100px;"></div>
   </q-page>
