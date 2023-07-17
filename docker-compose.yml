@@ -15,6 +15,9 @@ services:
         condition: service_healthy
     volumes:
       - ./data/backend:/app/backend/mount
+    networks:
+      - default
+      - autolab
   db:
     image: postgres:15
     restart: unless-stopped
@@ -51,3 +54,9 @@ services:
     volumes:
       - ./data/frontend/logs:/var/log/nginx
       - ./frontend/autolab-self-service/dist/spa:/usr/share/nginx/html
+networks:
+  default:
+    driver: bridge
+  autolab:
+    name: autolab-docker_default
+    external: true
