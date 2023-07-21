@@ -361,7 +361,7 @@ def initialize():
     with app.app_context():
         init_logging()
     # If, in the future, I want to use Alembic, remove this line:
-    db.initialize()
+    # db.initialize()  # Let Alembic handle this instead
     app.register_blueprint(app.api, url_prefix="/api")
     app.register_blueprint(app.user_api, url_prefix="/api/user_api")
 

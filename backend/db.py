@@ -22,6 +22,7 @@ Base = declarative_base()
 
 
 def initialize():
+    # This isn't used anymore because we're using Alembic to manage migrations
     from backend.models.user import User  # Needed to create tables
     from backend.models.session import Session  # Needed to create tables
     Base.metadata.create_all(bind=engine)
