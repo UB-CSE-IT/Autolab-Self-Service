@@ -10,4 +10,6 @@ COPY . .
 
 RUN mkdir -p mount
 
-CMD python3 -u initialize_autolab.py && gunicorn --bind 0.0.0.0:5057 server:gunicorn_app
+CMD alembic upgrade head && \
+python3 -u initialize_autolab.py && \
+gunicorn --bind 0.0.0.0:5057 server:gunicorn_app

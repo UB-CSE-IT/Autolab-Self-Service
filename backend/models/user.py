@@ -9,18 +9,18 @@ logger = logging.getLogger("portal")
 
 
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String)
-    first_name = Column(String)
-    last_name = Column(String)
-    person_number = Column(String)
-    is_admin = Column(Boolean, default=False)
+    username = Column(String, nullable=False, unique=True)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
+    person_number = Column(String, nullable=False, unique=True)
+    is_admin = Column(Boolean, default=False, nullable=False)
     sessions = relationship("Session", backref="user")
-    registered_at = Column(DateTime(timezone=True), server_default=func.now())
+    registered_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     last_login = Column(DateTime(timezone=True), server_default=func.now())
-    login_count = Column(Integer, default=0)
+    login_count = Column(Integer, default=0, nullable=False)
 
     def __repr__(self):
         return f"<User {self.username}>"

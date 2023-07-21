@@ -14,13 +14,13 @@ logger = logging.getLogger("portal")
 
 
 class Session(Base):
-    __tablename__ = "session"
+    __tablename__ = "sessions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
-    hashed_token = Column(String)
-    expires_at = Column(DateTime(timezone=True))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    hashed_token = Column(String, nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     logged_out_at = Column(DateTime(timezone=True), default=None)
 
     @staticmethod
