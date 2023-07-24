@@ -96,7 +96,7 @@ class TangoApiConnection:
                 "timeframe": f"{int(count)} {unit}",
                 "sentence": f"{submission_count} submission{'s' if submission_count != 1 else ''} "
                             f"in the past {int(count)} {unit}",
-                "percent": math.ceil(submission_count / max_submissions * 100),
+                "percent": math.ceil(submission_count / max_submissions * 100) if max_submissions > 0 else 0,
                 "seconds": seconds,
             }
 
