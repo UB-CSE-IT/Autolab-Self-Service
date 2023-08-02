@@ -200,4 +200,4 @@ class AutolabApiConnection:
         params = {
             "email": email_address
         }
-        return self.make_api_request("GET", "/api/v1/admin_check", params).get("is_administrator", False)
+        return self.make_api_request("GET", "/api/ubcseit/admin_check", params).get("is_administrator", False)
