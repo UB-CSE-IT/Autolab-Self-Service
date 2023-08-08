@@ -1,5 +1,6 @@
 import logging
 import time
+import cachetools.func
 import requests
 
 logger = logging.getLogger("portal")
@@ -201,3 +202,89 @@ class AutolabApiConnection:
             "email": email_address
         }
         return self.make_api_request("GET", "/api/ubcseit/admin_check", params).get("is_administrator", False)
+
+    @cachetools.func.ttl_cache(maxsize=100, ttl=60)
+    def user_courses(self, user_email: str) -> dict:
+        # Returns a dict like:
+        # {
+        #   "email": "user@buffalo.edu",
+        #   "courses": [
+        #     {
+        #       "name": "course1",  # The technical name of the course
+        #       "display_name": "Course 1",  # The display name of the course
+        #       "semester": "f23", # The semester code of the course
+        #       "role": "student",  # or "instructor" or "course_assistant"
+        #     }, ...
+        #   ],
+        # }
+        # Courses are sorted by end_date, so the most recent course is last.
+        logger.info(f"Getting Autolab courses for user {user_email}")
+        params = {
+            "email": user_email
+        }
+        return self.make_api_request("GET", "/api/ubcseit/user_courses", params)
+
+    @cachetools.func.ttl_cache(maxsize=100, ttl=60)
+    def course_users(self, course_name: str) -> dict:
+        # Returns a dict like:
+        # {
+        #   "course_name": "course1",  # The technical name of the course
+        #   "display_name": "Course 1",  # The display name of the course
+        #   "users": [
+        #     {
+        #       "email": "example@buffalo.edu",
+        #       "display_name": "First Last",
+        #       "role": "student", # or "instructor" or "course_assistant"
+        #     }, ...
+        #   ],
+        # }
+        # Users are sorted alphabetically by email address.
+        logger.info(f"Getting Autolab users for course {course_name}")
+        params = {
+            "course_name": course_name
+        }
+        return self.make_api_request("GET", "/api/ubcseit/course_users", params)
+
+    @cachetools.func.ttl_cache(maxsize=100, ttl=60)
+    def course_assessments(self, course_name: str) -> dict:
+        # Returns a dict like:
+        # {
+        #   "course_name": "course1",  # The technical name of the course
+        #   "display_name": "Course 1",  # The display name of the course
+        #   "assessments": [
+        #     {
+        #       "name": "assessment1",  # The technical name of the assessment
+        #       "display_name": "Assessment 1",  # The display name of the assessment
+        #       "url": "https://autolab.cse.buffalo.edu/courses/cse-it-test-course/assessments/pdftest",
+        #     }, ...
+        #   ],
+        # }
+        # Assessments are sorted by due date, with the earliest due date first.
+        logger.info(f"Getting Autolab assessments for course {course_name}")
+        params = {
+            "course_name": course_name
+        }
+        return self.make_api_request("GET", "/api/ubcseit/course_assessments", params)
+
+    @cachetools.func.ttl_cache(maxsize=100, ttl=10)
+    def get_assessment_submissions(self, course_name: str, assessment_name: str) -> dict:
+        # Returns a dict like:
+        # {
+        #   "course_name": "course1",  # The technical name of the course
+        #   "assessment_name": "assessment1",  # The technical name of the assessment
+        #   "submissions": [
+        #     {
+        #       "email": "somebody@buffalo.edu",
+        #       "display_name": "First Last"
+        #       "version": 22
+        #       "url": "https://autolab.cse.buffalo.edu/courses/cse-it-test-course/assessments/pdftest/submissions/22/view",
+        #     }, ...
+        #   ],
+        # }
+        # Submissions are sorted alphabetically by email address.
+        logger.info(f"Getting Autolab submissions for course {course_name} assessment {assessment_name}")
+        params = {
+            "course_name": course_name,
+            "assessment_name": assessment_name
+        }
+        return self.make_api_request("GET", "/api/ubcseit/assessment_submissions", params)
