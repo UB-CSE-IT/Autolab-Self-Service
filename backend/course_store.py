@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 from threading import Lock
 from typing import List, Dict
 
-from backend.connections.Course import Course
-from backend.connections.InfosourceConnection import InfoSourceConnection
-from backend.connections.Instructor import Instructor
+from backend.connections.course import Course
+from backend.connections.infosource_connection import InfoSourceConnection
+from backend.connections.instructor import Instructor
 
 logger = logging.getLogger("portal")
 

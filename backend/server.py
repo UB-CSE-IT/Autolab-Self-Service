@@ -3,12 +3,11 @@ import os
 from logging.handlers import RotatingFileHandler
 from flask import Flask, Blueprint, jsonify, request, make_response, g, redirect, abort
 from dotenv import load_dotenv
-from backend import db
-from backend.PerUserRateLimiter import rate_limit_per_user
-from backend.connections.AutolabApiConnection import AutolabApiConnection
-from backend.connections.InfosourceConnection import InfoSourceConnection
-from backend.CourseStore import CourseStore
-from backend.connections.TangoApiConnection import TangoApiConnection
+from backend.per_user_rate_limiter import rate_limit_per_user
+from backend.connections.autolab_api_connection import AutolabApiConnection
+from backend.connections.infosource_connection import InfoSourceConnection
+from backend.course_store import CourseStore
+from backend.connections.tango_api_connection import TangoApiConnection
 from backend.db import get_db_session
 from backend.models.session import Session
 from backend.models.user import User

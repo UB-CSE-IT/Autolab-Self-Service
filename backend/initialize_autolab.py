@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from backend.connections.AutolabApiConnection import AutolabApiConnection
+from backend.connections.autolab_api_connection import AutolabApiConnection
 
 if __name__ == '__main__':
     load_dotenv()

@@ -2,7 +2,7 @@ import logging
 from typing import List
 import oracledb
 
-from backend.connections.Course import Course
+from backend.connections.course import Course
 
 logger = logging.getLogger("portal")
 

@@ -1,6 +1,6 @@
 from typing import List, Any, Dict
 
-from backend.connections.Course import Course
+from backend.connections.course import Course
 
 
 class Instructor:
