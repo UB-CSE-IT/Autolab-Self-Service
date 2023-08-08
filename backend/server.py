@@ -3,6 +3,8 @@ import os
 from logging.handlers import RotatingFileHandler
 from flask import Flask, Blueprint, jsonify, request, make_response, g, redirect, abort
 from dotenv import load_dotenv
+
+from backend.grader_assignment_tool import gat
 from backend.per_user_rate_limiter import rate_limit_per_user
 from backend.connections.autolab_api_connection import AutolabApiConnection
 from backend.connections.infosource_connection import InfoSourceConnection
@@ -86,8 +88,32 @@ def after_request(response):
 def internal_server_error(e):
     return jsonify({
         "success": False,
-        "error": "Internal server error"
+        "error": "500: Internal server error"
     }), 500
+
+
+@app.errorhandler(401)
+def unauthorized_error(e):
+    return jsonify({
+        "success": False,
+        "error": "401: Authentication required"
+    }), 401
+
+
+@app.errorhandler(403)
+def forbidden_error(e):
+    return jsonify({
+        "success": False,
+        "error": "403: You don't have permission to access this resource"
+    }), 403
+
+
+@app.errorhandler(404)
+def forbidden_error(e):
+    return jsonify({
+        "success": False,
+        "error": "404: Resource not found"
+    }), 404
 
 
 @app.api.route("/login/", methods=["GET", "POST"])
@@ -361,8 +387,10 @@ def initialize():
         init_logging()
     # If, in the future, I want to use Alembic, remove this line:
     # db.initialize()  # Let Alembic handle this instead
-    app.register_blueprint(app.api, url_prefix="/api")
-    app.register_blueprint(app.user_api, url_prefix="/api/user_api")
+    app.register_blueprint(app.user_api, url_prefix="/api/user_api")  # The "user API" is for the Autolab Lightsaber
+    app.api.register_blueprint(gat, url_prefix="/gat")  # Grader Assignment Tool is an extension of the API
+    app.register_blueprint(app.api, url_prefix="/api")  # Base API for user functions, creating courses, admin sync
+    # Must be registered after all child blueprints
 
 
 initialize()
