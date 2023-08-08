@@ -66,6 +66,8 @@ class CourseGradingAssignment(Base):
 
 
 class CourseGradingAssignmentPair(Base):
+    __tablename__ = "course_grading_assignment_pairs"
+
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     course_grading_assignment_id: Mapped[int] = mapped_column(
         ForeignKey("course_grading_assignments.id"),

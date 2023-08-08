@@ -10,6 +10,8 @@ import backend.db as db
 # Import all models here:
 from backend.models.user import User
 from backend.models.session import Session
+from backend.models.gat_models import Course, CourseUser, CourseConflictOfInterest, CourseGradingAssignment, \
+    CourseGradingAssignmentPair
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
