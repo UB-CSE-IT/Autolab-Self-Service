@@ -66,7 +66,7 @@ def get_grader_courses(user: User) -> List[Course]:
     if user.is_admin:
         return list(g.db.query(Course).all())
 
-    course_users = g.db.query(CourseUser).filter(email=g.user.email).all()
+    course_users = g.db.query(CourseUser).filter_by(email=user.email).all()
     courses: List[Course] = [course_user.course for course_user in course_users]
     return courses
 
@@ -197,8 +197,7 @@ def create_course(course_name: str):
 
 @gat.route("/my-courses/", methods=["GET"])
 def my_courses():
-    courses = g.db.query(Course).filter_by(created_by_user=g.user).all()
-    # TODO change this to include courses where the user is a grader
+    courses = get_grader_courses(g.user)
     return jsonify({
         "success": True,
         "data": [course.to_dict() for course in courses]
