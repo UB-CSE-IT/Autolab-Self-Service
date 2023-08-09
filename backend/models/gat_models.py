@@ -23,6 +23,12 @@ class Course(Base):
     created_by_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     created_by_user: Mapped["User"] = relationship()
 
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "display_name": self.display_name,
+        }
+
 
 class CourseUser(Base):
     __tablename__ = "course_users"

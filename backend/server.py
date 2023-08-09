@@ -92,27 +92,39 @@ def internal_server_error(e):
     }), 500
 
 
-@app.errorhandler(401)
-def unauthorized_error(e):
+@app.errorhandler(400)
+def bad_request_error(e):
+    message = str(e) if e else "400: Bad request"
     return jsonify({
         "success": False,
-        "error": "401: Authentication required"
+        "error": message
+    }), 400
+
+
+@app.errorhandler(401)
+def unauthorized_error(e):
+    message = str(e) if e else "401: Authentication required"
+    return jsonify({
+        "success": False,
+        "error": message
     }), 401
 
 
 @app.errorhandler(403)
 def forbidden_error(e):
+    message = str(e) if e else "403: You don't have permission to access this resource"
     return jsonify({
         "success": False,
-        "error": "403: You don't have permission to access this resource"
+        "error": message
     }), 403
 
 
 @app.errorhandler(404)
-def forbidden_error(e):
+def not_found_error(e):
+    message = str(e) if e else "404: Resource not found"
     return jsonify({
         "success": False,
-        "error": "404: Resource not found"
+        "error": message
     }), 404
 
 
