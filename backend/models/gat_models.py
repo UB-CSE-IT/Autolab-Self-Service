@@ -45,6 +45,17 @@ class CourseUser(Base):
 
     UniqueConstraint(course_id, email)
 
+    def is_grader(self) -> bool:
+        return self.role == CourseRole.INSTRUCTOR or self.role == CourseRole.TA
+
+    def to_dict(self):
+        return {
+            "email": self.email,
+            "display_name": self.display_name,
+            "role": self.role.value,
+            "grading_hours": self.grading_hours,
+        }
+
 
 class CourseConflictOfInterest(Base):
     __tablename__ = "course_conflicts_of_interest"
