@@ -6,6 +6,7 @@ from typing import Tuple, Optional, List, Sequence, Set, Dict
 from flask import abort, current_app, jsonify
 from flask import Blueprint, g
 
+from backend.connections.autolab_api_connection import AutolabApiConnection
 from backend.models.gat_models import Course, CourseUser, CourseConflictOfInterest, CourseGradingAssignment, \
     CourseGradingAssignmentPair, CourseRole
 from backend.models.user import User
@@ -17,7 +18,7 @@ gat = Blueprint("gat", __name__)
 
 def get_current_user_autolab_courses() -> dict:
     email_address = g.user.email
-    autolab = current_app.autolab
+    autolab: AutolabApiConnection = current_app.autolab
     courses = autolab.user_courses(email_address)
     return courses
 
@@ -51,7 +52,7 @@ def user_is_grader_in_autolab_course(user_email: str, course_name: str) -> Tuple
     # If true, also return the course information dict
     # This should only be used for initially creating the local course and syncing the roster with Autolab
     # Local course operations should use `user_is_grader_in_course`
-    autolab = current_app.autolab
+    autolab: AutolabApiConnection = current_app.autolab
     user_courses: dict = autolab.user_courses(user_email)
     for course in user_courses["courses"]:
         if course["name"] == course_name:
@@ -89,6 +90,13 @@ def ensure_user_is_grader_in_course(user: User, course: Course):
         abort(403, f"{user.email} is not an instructor or course assistant in {course.name}.")
 
 
+def ensure_current_user_is_grader_in_autolab_course(course_name):
+    if g.user.is_admin:
+        return
+    if not user_is_grader_in_autolab_course(g.user.email, course_name):
+        abort(403, "You are not an instructor or course assistant in this course on Autolab.")
+
+
 def get_course_by_name_or_404(course_name: str) -> Course:
     course: Course = g.db.query(Course).filter_by(name=course_name).first()
     if course is None:
@@ -111,8 +119,7 @@ def sync_roster_from_autolab(course_name: str):
     if local_course is None:
         abort(404, "Course not found. Please create it first.")
 
-    if not user_is_grader_in_autolab_course(g.user.email, course_name):
-        abort(403, "You are not an instructor or course assistant in this course on Autolab.")
+    ensure_current_user_is_grader_in_autolab_course(course_name)
 
     # Get the current roster from our local database
     existing_course_users: Sequence[CourseUser] = g.db.query(CourseUser).filter_by(course=local_course).all()
@@ -121,7 +128,7 @@ def sync_roster_from_autolab(course_name: str):
     }
 
     # Get the current roster from Autolab
-    autolab = current_app.autolab
+    autolab: AutolabApiConnection = current_app.autolab
     autolab_course_users: List[dict] = autolab.course_users(course_name)["users"]
     autolab_course_user_email_dict: Dict[str, dict] = {
         autolab_course_user["email"]: autolab_course_user for autolab_course_user in autolab_course_users
@@ -387,6 +394,27 @@ def course_user_view(course_name: str, user_email: str):
         "course": course.to_dict(),
         "user": course_user.to_dict(),
         "conflicts_of_interest": conflicts_of_interest_emails
+    }
+
+    return jsonify({
+        "success": True,
+        "data": data
+    })
+
+
+@gat.route("/course/<course_name>/autolab-assessments/", methods=["GET"])
+def course_autolab_assessments_view(course_name: str):
+    # Get all Autolab assessments in a course. Requires being a grader in the course locally and on Autolab.
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+    ensure_current_user_is_grader_in_autolab_course(course_name)
+
+    autolab: AutolabApiConnection = current_app.autolab
+    assessments = autolab.course_assessments(course_name)["assessments"]
+
+    data = {
+        "course": course.to_dict(),
+        "assessments": assessments
     }
 
     return jsonify({
