@@ -337,3 +337,59 @@ def course_create_conflict_of_interest_view(course_name: str, grader_email: str,
         "success": True,
         "data": conflict_of_interest.to_dict()
     })
+
+
+@gat.route("/course/<course_name>/users/<grader_email>/conflict-of-interest/<student_email>/", methods=["DELETE"])
+def course_delete_conflict_of_interest_view(course_name: str, grader_email: str, student_email: str):
+    # Delete a conflict of interest between a grader and a student
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+
+    # Check that the conflict of interest exists
+    conflict_of_interest: CourseConflictOfInterest = \
+        g.db.query(CourseConflictOfInterest).filter_by(
+            course=course, grader_email=grader_email, student_email=student_email).first()
+    if conflict_of_interest is None:
+        abort(400, "This conflict of interest does not exist.")
+
+    conflict_dict: dict = conflict_of_interest.to_dict()
+
+    # Delete the conflict of interest
+    g.db.delete(conflict_of_interest)
+    g.db.commit()
+
+    logger.info(f"Deleted conflict of interest between {grader_email} and {student_email} in course {course_name}.")
+
+    return jsonify({
+        "success": True,
+        "data": conflict_dict
+    })
+
+
+@gat.route("/course/<course_name>/users/<user_email>/", methods=["GET"])
+def course_user_view(course_name: str, user_email: str):
+    # Get a user in a course
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+
+    course_user: CourseUser = get_course_user_by_email_or_404(course, user_email)
+
+    if course_user.is_grader():
+        conflicts_of_interest: Sequence[CourseConflictOfInterest] = g.db.query(CourseConflictOfInterest) \
+            .filter_by(course=course, grader_email=user_email).all()
+        conflicts_of_interest_emails = [conflict.student_email for conflict in conflicts_of_interest]
+    else:
+        conflicts_of_interest: Sequence[CourseConflictOfInterest] = g.db.query(CourseConflictOfInterest) \
+            .filter_by(course=course, student_email=user_email).all()
+        conflicts_of_interest_emails = [conflict.grader_email for conflict in conflicts_of_interest]
+
+    data = {
+        "course": course.to_dict(),
+        "user": course_user.to_dict(),
+        "conflicts_of_interest": conflicts_of_interest_emails
+    }
+
+    return jsonify({
+        "success": True,
+        "data": data
+    })
