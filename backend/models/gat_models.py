@@ -49,12 +49,16 @@ class CourseUser(Base):
         return self.role == CourseRole.INSTRUCTOR or self.role == CourseRole.TA
 
     def to_dict(self):
-        return {
+        ret = {
             "email": self.email,
             "display_name": self.display_name,
             "role": self.role.value,
-            "grading_hours": self.grading_hours,
+            "is_grader": self.is_grader(),
         }
+        if self.is_grader():
+            ret["grading_hours"] = self.grading_hours
+
+        return ret
 
 
 class CourseConflictOfInterest(Base):

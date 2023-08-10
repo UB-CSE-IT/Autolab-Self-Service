@@ -84,6 +84,18 @@ def user_is_grader_in_course(user: User, course: Course) -> bool:
     return course_user.is_grader()
 
 
+def ensure_user_is_grader_in_course(user: User, course: Course):
+    if not user_is_grader_in_course(user, course):
+        abort(403, "You are not an instructor or course assistant in this course.")
+
+
+def get_course_by_name_or_404(course_name: str) -> Course:
+    course: Course = g.db.query(Course).filter_by(name=course_name).first()
+    if course is None:
+        abort(404, "Course not found.")
+    return course
+
+
 def sync_roster_from_autolab(course_name: str):
     # Sync the current local course roster with the one from Autolab
     logger.info(f"Syncing roster from Autolab for course {course_name}")
@@ -155,18 +167,18 @@ def require_login():
 
 
 @gat.route("/")
-def index():
+def index_view():
     return f"Hello from GAT (Grader Assignment Tool), {g.user.username}!"
 
 
 @gat.route("/my-autolab-courses/", methods=["GET"])
-def my_autolab_courses():
+def my_autolab_courses_view():
     courses = get_current_user_autolab_courses()
     return jsonify(courses)
 
 
 @gat.route("/create-course/<course_name>/", methods=["POST"])
-def create_course(course_name: str):
+def create_course_view(course_name: str):
     # Given an Autolab course name, create a corresponding course in our database, if the user has permission
     in_course: bool
     course_info: Optional[dict]
@@ -196,7 +208,7 @@ def create_course(course_name: str):
 
 
 @gat.route("/my-courses/", methods=["GET"])
-def my_courses():
+def my_courses_view():
     courses = get_grader_courses(g.user)
     return jsonify({
         "success": True,
@@ -205,9 +217,47 @@ def my_courses():
 
 
 @gat.route("/course/<course_name>/autolab-sync/", methods=["POST"])
-def course_autolab_sync(course_name: str):
+def course_autolab_sync_view(course_name: str):
     # The `sync_roster_from_autolab` function handles permission checking and will raise an exception on failure
     sync_roster_from_autolab(course_name)
     return jsonify({
         "success": True
     })
+
+
+@gat.route("/course/<course_name>/users/", methods=["GET"])
+def course_users_view(course_name: str):
+    # Returns a list of graders and students in the course, with the current user first (if they are a grader)
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+
+    course_users: Sequence[CourseUser] = \
+        g.db.query(CourseUser).filter_by(course=course).order_by(CourseUser.email).all()
+    graders: List[dict] = []
+    students: List[dict] = []
+    current_user_in_graders_roster: bool = False
+
+    course_user: CourseUser
+    for course_user in course_users:
+        if course_user.is_grader():
+            user_dict: dict = course_user.to_dict()
+            if course_user.email == g.user.email:
+                user_dict["is_current_user"] = True
+                current_user_in_graders_roster = True
+                graders.insert(0, user_dict)
+            else:
+                graders.append(user_dict)
+        else:
+            students.append(course_user.to_dict())
+
+    ret = {
+        "success": True,
+        "data": {
+            "course": course.to_dict(),
+            "current_user_in_graders_roster": current_user_in_graders_roster,
+            "graders": graders,
+            "students": students
+        }
+    }
+
+    return jsonify(ret)
