@@ -86,7 +86,7 @@ def user_is_grader_in_course(user: User, course: Course) -> bool:
 
 def ensure_user_is_grader_in_course(user: User, course: Course):
     if not user_is_grader_in_course(user, course):
-        abort(403, "You are not an instructor or course assistant in this course.")
+        abort(403, f"{user.email} is not an instructor or course assistant in {course.name}.")
 
 
 def get_course_by_name_or_404(course_name: str) -> Course:
@@ -94,6 +94,13 @@ def get_course_by_name_or_404(course_name: str) -> Course:
     if course is None:
         abort(404, "Course not found.")
     return course
+
+
+def get_course_user_by_email_or_404(course: Course, user_email: str) -> CourseUser:
+    course_user: CourseUser = g.db.query(CourseUser).filter_by(email=user_email, course=course).first()
+    if course_user is None:
+        abort(404, f"User does not exist in course {course.name}.")
+    return course_user
 
 
 def sync_roster_from_autolab(course_name: str):
@@ -261,3 +268,32 @@ def course_users_view(course_name: str):
     }
 
     return jsonify(ret)
+
+
+@gat.route("/course/<course_name>/users/<user_email>/set-grader-hours/<int:hours>/", methods=["POST"])
+def course_set_grader_hours_view(course_name: str, user_email: str, hours: int):
+    # Set the number of hours a grader should work for a course
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+
+    course_user: CourseUser = get_course_user_by_email_or_404(course, user_email)
+
+    # Check that the target user is a grader
+    if not course_user.is_grader():
+        abort(400, "Hours cannot be assigned to students.")
+
+    # Check that the hours are reasonable
+    if hours < 0:
+        abort(400, "Hours must be non-negative.")
+    elif hours > 1000:
+        abort(400, "Hours must be at most 1000.")
+
+    course_user.grading_hours = hours
+    g.db.commit()
+
+    logger.info(f"Set grader hours for {user_email} in course {course_name} to {hours}.")
+
+    return jsonify({
+        "success": True,
+        "data": course_user.to_dict()
+    })
