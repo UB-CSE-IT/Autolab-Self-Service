@@ -72,6 +72,12 @@ class CourseConflictOfInterest(Base):
 
     UniqueConstraint(course_id, grader_email, student_email)
 
+    def to_dict(self):
+        return {
+            "grader_email": self.grader_email,
+            "student_email": self.student_email,
+        }
+
 
 class CourseGradingAssignment(Base):
     __tablename__ = "course_grading_assignments"

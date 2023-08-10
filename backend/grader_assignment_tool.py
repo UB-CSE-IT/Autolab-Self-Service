@@ -297,3 +297,43 @@ def course_set_grader_hours_view(course_name: str, user_email: str, hours: int):
         "success": True,
         "data": course_user.to_dict()
     })
+
+
+@gat.route("/course/<course_name>/users/<grader_email>/conflict-of-interest/<student_email>/", methods=["POST"])
+def course_create_conflict_of_interest_view(course_name: str, grader_email: str, student_email: str):
+    # Create a conflict of interest between a grader and a student
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+
+    grader: CourseUser = get_course_user_by_email_or_404(course, grader_email)
+    student: CourseUser = get_course_user_by_email_or_404(course, student_email)
+
+    # Check that the target grader is a grader
+    if not grader.is_grader():
+        abort(400, "Conflicts of interest cannot be assigned to students.")
+
+    # Check that the target student is a student
+    if student.is_grader():
+        abort(400, "A grader cannot have a conflict of interest with another grader.")
+        # This also prevents a grader from having a conflict of interest with themselves
+
+    # Check that the conflict of interest does not already exist
+    conflict_of_interest: CourseConflictOfInterest = \
+        g.db.query(CourseConflictOfInterest).filter_by(
+            course=course, grader_email=grader.email, student_email=student.email).first()
+    if conflict_of_interest is not None:
+        abort(400, "This conflict of interest already exists.")
+
+    # Create the conflict of interest
+    conflict_of_interest = CourseConflictOfInterest(course=course,
+                                                    grader_email=grader.email,
+                                                    student_email=student.email)
+    g.db.add(conflict_of_interest)
+    g.db.commit()
+
+    logger.info(f"Created conflict of interest between {grader_email} and {student_email} in course {course_name}.")
+
+    return jsonify({
+        "success": True,
+        "data": conflict_of_interest.to_dict()
+    })

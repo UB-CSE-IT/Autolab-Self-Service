@@ -50,6 +50,7 @@ class User(Base):
             "firstName": self.first_name,
             "lastName": self.last_name,
             "isAdmin": self.is_admin,
+            "email": self.email,
         }
 
     @property
