@@ -173,6 +173,67 @@ def sync_roster_from_autolab(course_name: str):
     g.db.commit()
 
 
+def create_grading_assignments(
+        graders: Dict[str, Dict[str, any]],
+        conflicts_of_interest: List[Dict[str, str]],
+        submissions: Dict[str, Dict[str, any]]
+) -> Dict[str, Dict[str, any]]:
+    # Create a grader to student one-to-many mapping accounting for the grader's
+    # number of hours and avoiding conflicts of interest
+    #
+    # `graders` should be formatted like: Dict of (grader email address) -> CourseUser.to_dict()
+    #   {
+    #     "grader@buffalo": {
+    #       "display_name": "First Last",
+    #       "email": "grader@buffalo.edu",
+    #       "grading_hours": 10,
+    #       "is_grader": True,
+    #       "role": "course_assistant"
+    #     }, ...
+    #   }
+    #
+    # `conflicts_of_interest` should be formatted like: List of CourseConflictOfInterest.to_dict()
+    #   [
+    #     {
+    #       "grader_email": "grader@buffalo",
+    #       "student_email": "student@buffalo"
+    #     }, ...
+    #   ]
+    #
+    # `submissions` should be formatted like: Dict of (student email address) -> Submission dict
+    #   {
+    #     "student@buffalo": {
+    #       "email": "student@buffalo.edu",
+    #       "display_name": "First Last"
+    #       "version": 22
+    #       "url": "https://autolab.cse.buffalo.edu/courses/cse-it-test-course/assessments/pdftest/submissions/22/view",
+    #     }, ...
+    #   }
+    #
+    # Returns a dictionary mapping grader email to a list of submissions to grade, like:
+    #   {
+    #     "grader@buffalo": [
+    #       {
+    #         "email": "student1@buffalo",
+    #         "display_name": "First Last",
+    #         "version": 22,
+    #         "url": "https://autolab.cse.buffalo.edu/courses/.../pdftest/submissions/22/view",
+    #       }, ...
+    #     ], ...
+    #   }
+
+    # TODO implement the algorithm
+
+    # TODO this isn't actually what will be returned
+    ret = {
+        "graders": graders,
+        "conflicts_of_interest": conflicts_of_interest,
+        "submissions": submissions,
+    }
+
+    return ret
+
+
 # Require login for all routes in this blueprint
 @gat.before_request
 def require_login():
@@ -420,4 +481,51 @@ def course_autolab_assessments_view(course_name: str):
     return jsonify({
         "success": True,
         "data": data
+    })
+
+
+@gat.route("/course/<course_name>/create-grading-assignment/<assessment_name>/", methods=["POST"])
+def course_create_grading_assignment_view(course_name: str, assessment_name: str):
+    # Create a new grading assignment for an Autolab assessment in a course. Requires being a grader in the course.
+    # Maps graders to students who submitted the assessment accounting for conflicts of interest and grading hours.
+
+    # Permission checks
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+    ensure_current_user_is_grader_in_autolab_course(course_name)
+
+    # Get the assessment data from Autolab
+    autolab: AutolabApiConnection = current_app.autolab
+    assessment: dict = autolab.get_assessment_submissions(course_name, assessment_name)
+    submissions_by_student: dict = {submission["email"]: submission for submission in assessment["submissions"]}
+
+    # Get the conflicts of interest
+    course_conflicts_of_interest: Sequence[CourseConflictOfInterest] = \
+        g.db.query(CourseConflictOfInterest).filter_by(course=course).all()
+    conflicts_of_interest_list: List[Dict[str, any]] = [conflict.to_dict() for conflict in course_conflicts_of_interest]
+
+    # Get the graders in the course
+    course_users: Sequence[CourseUser] = g.db.query(CourseUser).filter_by(course=course).all()
+    graders: Dict[str, Dict[str, any]] = {user.email: user.to_dict() for user in course_users if user.is_grader()}
+
+    algo_response = create_grading_assignments(graders, conflicts_of_interest_list, submissions_by_student)
+
+    # TODO Store the grading assignment in the database
+
+    # TODO this isn't really all gonna be returned, just for testing
+    ret = {
+        "algo_response": algo_response,
+        "course": course.to_dict(),
+        "assessment": {
+            "name": assessment["assessment_name"],
+            "display_name": assessment["assessment_display_name"],
+        },
+        "submissions": submissions_by_student,
+        "course_conflicts_of_interest": [conflict.to_dict() for conflict in course_conflicts_of_interest],
+        "course_users": [user.to_dict() for user in course_users]
+    }
+
+    return jsonify({
+        "success": True,
+        "data": ret
     })

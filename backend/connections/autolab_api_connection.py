@@ -272,6 +272,7 @@ class AutolabApiConnection:
         # {
         #   "course_name": "course1",  # The technical name of the course
         #   "assessment_name": "assessment1",  # The technical name of the assessment
+        #   "assessment_display_name": "Assessment 1",  # The display name of the assessment
         #   "submissions": [
         #     {
         #       "email": "somebody@buffalo.edu",
