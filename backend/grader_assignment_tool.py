@@ -1,4 +1,5 @@
 import logging
+import random
 from collections import defaultdict
 
 import cachetools.func
@@ -178,7 +179,7 @@ def create_grading_assignments(
         graders: Dict[str, Dict[str, any]],
         conflicts_of_interest: List[Dict[str, str]],
         submissions: Dict[str, Dict[str, any]]
-) -> Dict[str, Dict[str, any]]:
+) -> Dict[str, List[Dict[str, any]]]:
     # Create a grader to student one-to-many mapping accounting for the grader's
     # number of hours and avoiding conflicts of interest
     #
@@ -238,11 +239,11 @@ def create_grading_assignments(
         student_to_conflicts[student].add(grader)
     logger.debug(f"Student to conflicts: {student_to_conflicts}")
 
-    # Order the students by the number of conflicts they have descending
-    students_ordered_by_conflicts: List[str] = sorted(submissions.keys(),
-                                                      reverse=True,
-                                                      key=lambda s: len(student_to_conflicts[s]))
-    logger.debug(f"Students ordered by conflicts (desc): {students_ordered_by_conflicts}")
+    # Order the students by the number of conflicts they have descending, with a random shuffle for ties
+    students: List[str] = list(submissions.keys())
+    random.shuffle(students)
+    students.sort(reverse=True, key=lambda s: len(student_to_conflicts[s]))
+    logger.debug(f"Students ordered by conflicts (desc): {students}")
 
     # Determine how many submissions each grader should grade
     grader_to_hours: Dict[str, int] = {grader: info["grading_hours"] for grader, info in graders.items()}
@@ -251,41 +252,51 @@ def create_grading_assignments(
     logger.debug(f"Total hours: {total_hours}")
     total_submissions: int = len(submissions)
     logger.debug(f"Total submissions: {total_submissions}")
-    grader_submissions: Dict[str, int] = {}
+    grader_submissions_count: Dict[str, int] = {}
     for grader, hours in grader_to_hours.items():
         if hours == 0:
             # Ignore instructors and TAs who aren't grading this assessment
             logger.debug(f"Ignoring course grader {grader} since they have 0 hours.")
             continue
-        grader_submissions[grader] = hours * total_submissions // total_hours
+        grader_submissions_count[grader] = hours * total_submissions // total_hours
     # Sort graders by submissions ascending
-    logger.debug(f"Initial submissions per grader: {grader_submissions}")
-    graders_sorted_by_submissions: List[str] = sorted(grader_submissions.keys(), key=lambda s: grader_submissions[s])
-    logger.debug(f"Graders sorted by submissions (asc): {graders_sorted_by_submissions}")
+    logger.debug(f"Initial submissions per grader: {grader_submissions_count}")
+    graders_sorted_by_submissions: List[str] = \
+        sorted(grader_submissions_count.keys(), key=lambda s: grader_submissions_count[s])
+    logger.debug(f"Graders sorted by submissions count (asc): {graders_sorted_by_submissions}")
     # Distribute leftover submissions to graders with the least submissions
-    leftover_submissions: int = total_submissions - sum(grader_submissions.values())
+    leftover_submissions: int = total_submissions - sum(grader_submissions_count.values())
     logger.debug(f"Leftover submissions: {leftover_submissions}")
     for i in range(leftover_submissions):
-        grader_submissions[graders_sorted_by_submissions[i]] += 1
+        grader_submissions_count[graders_sorted_by_submissions[i]] += 1
         logger.debug(f"Added 1 submission to {graders_sorted_by_submissions[i]}")
+    logger.debug(f"Final submissions per grader: {grader_submissions_count}")
 
-    logger.debug(f"Final submissions per grader: {grader_submissions}")
+    def get_random_viable_grader_for_student(student: str) -> str:
+        # Returns a random viable grader for the given student, subtracting 1 from the grader's submissions count
 
+        # Remove conflicts of interest from the list of all graders with hours
+        viable_graders: List[str] = list(grader_submissions_count.keys() - student_to_conflicts[student])
+        logger.debug(f"Viable graders for {student}: {viable_graders}")
+        # Get weights for each grader based on their remaining submissions count
+        grader_weights: List[int] = [grader_submissions_count[grader] for grader in viable_graders]
+        logger.debug(f"Grader weights for {student}: {grader_weights}")
+        # Choose a random grader based on the weights
+        grader: str = random.choices(viable_graders, weights=grader_weights, k=1)[0]
+        # ^ Raises ValueError if all weights are 0 or IndexError if there are no weights (no viable graders)
+        logger.debug(f"Selected grader for student {student}: {grader}")
+        # Subtract 1 from the grader's submissions count
+        grader_submissions_count[grader] -= 1
+        return grader
 
-    # TODO this isn't actually what will be returned
-    ret = {
-        "graders": graders,
-        "conflicts_of_interest": conflicts_of_interest,
-        "submissions": submissions,
-        "conflicts": {x: list(y) for x, y in student_to_conflicts.items()},
-        "ordered_students": students_ordered_by_conflicts,
-        "grader_hours": grader_to_hours,
-        "total_hours": total_hours,
-        "total_submissions": total_submissions,
-        "grader_submissions": grader_submissions,
-    }
+    grader_submissions: DefaultDict[str, List[Dict[str, any]]] = defaultdict(list)
 
-    return ret
+    # Choose a grader for each student
+    for student in students:
+        grader: str = get_random_viable_grader_for_student(student)
+        grader_submissions[grader].append(submissions[student])
+
+    return grader_submissions
 
 
 # Require login for all routes in this blueprint
