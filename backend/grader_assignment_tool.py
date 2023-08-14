@@ -605,6 +605,9 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
 
     g.db.commit()
 
+    logger.info(f"Created grading assignment (ID {course_grading_assignment.id}) for assessment {assessment_name} "
+                f"in course {course_name}.")
+
     ret = {
         "id": course_grading_assignment.id,
     }
