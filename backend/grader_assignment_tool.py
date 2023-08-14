@@ -573,21 +573,40 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
     course_users: Sequence[CourseUser] = g.db.query(CourseUser).filter_by(course=course).all()
     graders: Dict[str, Dict[str, any]] = {user.email: user.to_dict() for user in course_users if user.is_grader()}
 
-    algo_response = create_grading_assignments(graders, conflicts_of_interest_list, submissions_by_student)
+    # Compute the grading assignment pairs
+    grading_assignments: Dict[str, List[Dict[str, any]]] = \
+        create_grading_assignments(graders, conflicts_of_interest_list, submissions_by_student)
 
-    # TODO Store the grading assignment in the database
+    # Create a grading assignment in the database
+    course_grading_assignment: CourseGradingAssignment = CourseGradingAssignment(
+        course=course,
+        assessment_name=assessment_name,
+        created_by_user=g.user,
+        assessment_display_name=assessment["assessment_display_name"]
+    )
+    g.db.add(course_grading_assignment)
 
-    # TODO this isn't really all gonna be returned, just for testing
+    # Create the grading assignment pairs in the database
+    for grader_email, submissions in grading_assignments.items():
+        for submission in submissions:
+            student_display_name = submission["display_name"]
+            student_email = submission["email"]
+            student_version = submission["version"]
+            student_url = submission["url"]
+            course_grading_assignment_pair: CourseGradingAssignmentPair = CourseGradingAssignmentPair(
+                course_grading_assignment=course_grading_assignment,
+                grader_email=grader_email,
+                student_email=student_email,
+                submission_url=student_url,
+                student_display_name=student_display_name,
+                submission_version=student_version
+            )
+            g.db.add(course_grading_assignment_pair)
+
+    g.db.commit()
+
     ret = {
-        "algo_response": algo_response,
-        "course": course.to_dict(),
-        "assessment": {
-            "name": assessment["assessment_name"],
-            "display_name": assessment["assessment_display_name"],
-        },
-        "submissions": submissions_by_student,
-        "course_conflicts_of_interest": [conflict.to_dict() for conflict in course_conflicts_of_interest],
-        "course_users": [user.to_dict() for user in course_users]
+        "id": course_grading_assignment.id,
     }
 
     return jsonify({

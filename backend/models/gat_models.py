@@ -90,6 +90,7 @@ class CourseGradingAssignment(Base):
     created_by_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     created_by_user: Mapped["User"] = relationship()
     archived: Mapped[bool] = mapped_column(nullable=False, default=False)
+    assessment_display_name: Mapped[str] = mapped_column(nullable=False)
 
 
 class CourseGradingAssignmentPair(Base):
