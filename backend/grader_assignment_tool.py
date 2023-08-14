@@ -1,7 +1,8 @@
 import logging
+from collections import defaultdict
 
 import cachetools.func
-from typing import Tuple, Optional, List, Sequence, Set, Dict
+from typing import Tuple, Optional, List, Sequence, Set, Dict, DefaultDict
 
 from flask import abort, current_app, jsonify
 from flask import Blueprint, g
@@ -222,13 +223,66 @@ def create_grading_assignments(
     #     ], ...
     #   }
 
-    # TODO implement the algorithm
+    logger.debug("Creating grading assignments")
+    logger.debug(f"Graders: {graders}")
+    logger.debug(f"Conflicts of interest: {conflicts_of_interest}")
+    logger.debug(f"Submissions: {submissions}")
+
+    # Get the conflicts for each student
+    logger.debug("Getting conflicts for each student")
+    student_to_conflicts: DefaultDict[str, Set[str]] = defaultdict(set)
+    conflict: Dict[str, str]
+    for conflict in conflicts_of_interest:
+        student: str = conflict["student_email"]
+        grader: str = conflict["grader_email"]
+        student_to_conflicts[student].add(grader)
+    logger.debug(f"Student to conflicts: {student_to_conflicts}")
+
+    # Order the students by the number of conflicts they have descending
+    students_ordered_by_conflicts: List[str] = sorted(submissions.keys(),
+                                                      reverse=True,
+                                                      key=lambda s: len(student_to_conflicts[s]))
+    logger.debug(f"Students ordered by conflicts (desc): {students_ordered_by_conflicts}")
+
+    # Determine how many submissions each grader should grade
+    grader_to_hours: Dict[str, int] = {grader: info["grading_hours"] for grader, info in graders.items()}
+    logger.debug(f"Grader to hours: {grader_to_hours}")
+    total_hours: int = sum(grader_to_hours.values())
+    logger.debug(f"Total hours: {total_hours}")
+    total_submissions: int = len(submissions)
+    logger.debug(f"Total submissions: {total_submissions}")
+    grader_submissions: Dict[str, int] = {}
+    for grader, hours in grader_to_hours.items():
+        if hours == 0:
+            # Ignore instructors and TAs who aren't grading this assessment
+            logger.debug(f"Ignoring course grader {grader} since they have 0 hours.")
+            continue
+        grader_submissions[grader] = hours * total_submissions // total_hours
+    # Sort graders by submissions ascending
+    logger.debug(f"Initial submissions per grader: {grader_submissions}")
+    graders_sorted_by_submissions: List[str] = sorted(grader_submissions.keys(), key=lambda s: grader_submissions[s])
+    logger.debug(f"Graders sorted by submissions (asc): {graders_sorted_by_submissions}")
+    # Distribute leftover submissions to graders with the least submissions
+    leftover_submissions: int = total_submissions - sum(grader_submissions.values())
+    logger.debug(f"Leftover submissions: {leftover_submissions}")
+    for i in range(leftover_submissions):
+        grader_submissions[graders_sorted_by_submissions[i]] += 1
+        logger.debug(f"Added 1 submission to {graders_sorted_by_submissions[i]}")
+
+    logger.debug(f"Final submissions per grader: {grader_submissions}")
+
 
     # TODO this isn't actually what will be returned
     ret = {
         "graders": graders,
         "conflicts_of_interest": conflicts_of_interest,
         "submissions": submissions,
+        "conflicts": {x: list(y) for x, y in student_to_conflicts.items()},
+        "ordered_students": students_ordered_by_conflicts,
+        "grader_hours": grader_to_hours,
+        "total_hours": total_hours,
+        "total_submissions": total_submissions,
+        "grader_submissions": grader_submissions,
     }
 
     return ret
