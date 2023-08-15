@@ -171,14 +171,17 @@ def dev_login():
     username = request.form.get("username")
     user_data = app.infosource.get_person_info_by_username(username)
     if user_data is None:
-        return jsonify({
-            "success": False,
-            "error": "User does not exist."
-        }), 404
-
-    first_name = user_data["FIRST_NAME"]
-    last_name = user_data["LAST_NAME"]
-    person_number = user_data["PERSON_NUMBER"]
+        first_name = f"{username.capitalize()} (dev)"
+        last_name = "Last (dev)"
+        person_number = "00000000"
+        # return jsonify({
+        #     "success": False,
+        #     "error": "User does not exist."
+        # }), 404
+    else:
+        first_name = user_data["FIRST_NAME"]
+        last_name = user_data["LAST_NAME"]
+        person_number = user_data["PERSON_NUMBER"]
 
     # Set the headers as if they came from Shibboleth to pass to the regular login
     request.headers.environ["HTTP_UID"] = username
