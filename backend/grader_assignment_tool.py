@@ -5,7 +5,7 @@ from collections import defaultdict, OrderedDict as ordereddict
 import cachetools.func
 from typing import Tuple, Optional, List, Sequence, Set, Dict, DefaultDict, OrderedDict
 
-from flask import abort, current_app, jsonify
+from flask import abort, current_app, jsonify, request
 from flask import Blueprint, g
 
 from backend.connections.autolab_api_connection import AutolabApiConnection
@@ -744,4 +744,33 @@ def course_grading_assignment_view(course_name: str, assignment_id: int):
     return jsonify({
         "success": True,
         "data": ret
+    })
+
+
+@gat.route("/course/<course_name>/grading-assignments/<int:assignment_id>/archive/", methods=["POST", "DELETE"])
+def course_grading_assignment_archive_view(course_name: str, assignment_id: int):
+    # Archive or unarchive a grading assignment by ID (POST to archive, DELETE to unarchive)
+
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+
+    assignment: CourseGradingAssignment = \
+        g.db.query(CourseGradingAssignment).filter_by(course=course, id=assignment_id).first()
+
+    if assignment is None:
+        abort(404, f"Grading assignment with ID {assignment_id} does not exist in this course.")
+
+    target_is_archived: bool = request.method == "POST"  # Do we want to archive (T) or unarchive (F) the assignment?
+    if assignment.archived == target_is_archived:
+        abort(400, f"Grading assignment with ID {assignment_id} is already "
+                   f"{'archived' if assignment.archived else 'unarchived'}.")
+
+    assignment.archived = target_is_archived
+    g.db.commit()
+
+    logger.info(f"{'Archived' if target_is_archived else 'Unarchived'} grading assignment with ID {assignment_id}.")
+
+    return jsonify({
+        "success": True,
+        "data": assignment.to_dict()
     })
