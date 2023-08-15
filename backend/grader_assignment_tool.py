@@ -12,6 +12,7 @@ from backend.connections.autolab_api_connection import AutolabApiConnection
 from backend.models.gat_models import Course, CourseUser, CourseConflictOfInterest, CourseGradingAssignment, \
     CourseGradingAssignmentPair, CourseRole
 from backend.models.user import User
+from backend.per_user_rate_limiter import rate_limit_per_user
 
 logger = logging.getLogger("portal")
 
@@ -381,12 +382,14 @@ def index_view():
 
 
 @gat.route("/my-autolab-courses/", methods=["GET"])
+@rate_limit_per_user(3, 10)  # 3 requests per 10 seconds
 def my_autolab_courses_view():
     courses = get_current_user_autolab_courses()
     return jsonify(courses)
 
 
 @gat.route("/create-course/<course_name>/", methods=["POST"])
+@rate_limit_per_user(3, 60)  # 3 requests per minute
 def create_course_view(course_name: str):
     # Given an Autolab course name, create a corresponding course in our database, if the user has permission
     in_course: bool
@@ -417,6 +420,7 @@ def create_course_view(course_name: str):
 
 
 @gat.route("/my-courses/", methods=["GET"])
+@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
 def my_courses_view():
     courses = get_grader_courses(g.user)
     return jsonify({
@@ -426,6 +430,7 @@ def my_courses_view():
 
 
 @gat.route("/course/<course_name>/autolab-sync/", methods=["POST"])
+@rate_limit_per_user(3, 60)  # 3 requests per minute
 def course_autolab_sync_view(course_name: str):
     # The `sync_roster_from_autolab` function handles permission checking and will raise an exception on failure
     sync_roster_from_autolab(course_name)
@@ -435,6 +440,7 @@ def course_autolab_sync_view(course_name: str):
 
 
 @gat.route("/course/<course_name>/users/", methods=["GET"])
+@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
 def course_users_view(course_name: str):
     # Returns a list of graders and students in the course, with the current user first (if they are a grader)
     course: Course = get_course_by_name_or_404(course_name)
@@ -473,6 +479,7 @@ def course_users_view(course_name: str):
 
 
 @gat.route("/course/<course_name>/users/<user_email>/set-grader-hours/<int:hours>/", methods=["POST"])
+@rate_limit_per_user(50, 60)  # 50 requests per minute (users may rapidly enter hours for every grader)
 def course_set_grader_hours_view(course_name: str, user_email: str, hours: int):
     # Set the number of hours a grader should work for a course
     course: Course = get_course_by_name_or_404(course_name)
@@ -502,6 +509,7 @@ def course_set_grader_hours_view(course_name: str, user_email: str, hours: int):
 
 
 @gat.route("/course/<course_name>/users/<grader_email>/conflict-of-interest/<student_email>/", methods=["POST"])
+@rate_limit_per_user(50, 60)  # 50 requests per minute (users may rapidly add conflicts)
 def course_create_conflict_of_interest_view(course_name: str, grader_email: str, student_email: str):
     # Create a conflict of interest between a grader and a student
     course: Course = get_course_by_name_or_404(course_name)
@@ -542,6 +550,7 @@ def course_create_conflict_of_interest_view(course_name: str, grader_email: str,
 
 
 @gat.route("/course/<course_name>/users/<grader_email>/conflict-of-interest/<student_email>/", methods=["DELETE"])
+@rate_limit_per_user(50, 60)  # 50 requests per minute (users may rapidly remove conflicts)
 def course_delete_conflict_of_interest_view(course_name: str, grader_email: str, student_email: str):
     # Delete a conflict of interest between a grader and a student
     course: Course = get_course_by_name_or_404(course_name)
@@ -569,6 +578,7 @@ def course_delete_conflict_of_interest_view(course_name: str, grader_email: str,
 
 
 @gat.route("/course/<course_name>/users/<user_email>/", methods=["GET"])
+@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
 def course_user_view(course_name: str, user_email: str):
     # Get a user in a course
     course: Course = get_course_by_name_or_404(course_name)
@@ -598,6 +608,7 @@ def course_user_view(course_name: str, user_email: str):
 
 
 @gat.route("/course/<course_name>/autolab-assessments/", methods=["GET"])
+@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
 def course_autolab_assessments_view(course_name: str):
     # Get all Autolab assessments in a course. Requires being a grader in the course locally and on Autolab.
     course: Course = get_course_by_name_or_404(course_name)
@@ -619,6 +630,7 @@ def course_autolab_assessments_view(course_name: str):
 
 
 @gat.route("/course/<course_name>/create-grading-assignment/<assessment_name>/", methods=["POST"])
+@rate_limit_per_user(1, 5)  # 1 request per 5 seconds (this is a slow operation)
 def course_create_grading_assignment_view(course_name: str, assessment_name: str):
     # Create a new grading assignment for an Autolab assessment in a course. Requires being a grader in the course.
     # Maps graders to students who submitted the assessment accounting for conflicts of interest and grading hours.
@@ -686,6 +698,7 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
 
 
 @gat.route("/course/<course_name>/grading-assignments/", methods=["GET"])
+@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
 def course_grading_assignments_view(course_name: str):
     # Get all the grading assignments for a course ordered by creation date descending (newest first)
 
@@ -708,6 +721,7 @@ def course_grading_assignments_view(course_name: str):
 
 
 @gat.route("/course/<course_name>/grading-assignments/<int:assignment_id>/", methods=["GET"])
+@rate_limit_per_user(3, 10)  # 3 requests per 10 seconds
 def course_grading_assignment_view(course_name: str, assignment_id: int):
     # Get the details for a particular grading assignment by ID
 
@@ -751,6 +765,7 @@ def course_grading_assignment_view(course_name: str, assignment_id: int):
 
 
 @gat.route("/course/<course_name>/grading-assignments/<int:assignment_id>/archive/", methods=["POST", "DELETE"])
+@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
 def course_grading_assignment_archive_view(course_name: str, assignment_id: int):
     # Archive or unarchive a grading assignment by ID (POST to archive, DELETE to unarchive)
 
@@ -781,6 +796,7 @@ def course_grading_assignment_archive_view(course_name: str, assignment_id: int)
 
 @gat.route("/course/<course_name>/grading-assignments/<int:assignment_id>/pairs/<int:pair_id>/complete/",
            methods=["POST", "DELETE"])
+@rate_limit_per_user(10, 5)  # 10 requests per 5 seconds
 def course_grading_assignment_pair_complete_view(course_name: str, assignment_id: int, pair_id: int):
     # Mark a grading assignment pair as complete or incomplete (POST to complete, DELETE to incomplete)
     # Only the grader assigned to the pair can mark it as complete (or portal admins)
