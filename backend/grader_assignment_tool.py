@@ -317,6 +317,7 @@ def format_grading_assignment_pairs(pairs: Sequence[CourseGradingAssignmentPair]
     #     },
     #     "submissions": [
     #       {
+    #         "pair_id": 100,
     #         "student_email": "student@buffalo",
     #         "student_display_name": "First Last",
     #         "submission_url": "https://autolab.cse.buffalo.edu/courses/.../pdftest/submissions/22/view",
@@ -335,6 +336,7 @@ def format_grading_assignment_pairs(pairs: Sequence[CourseGradingAssignmentPair]
 
     pair: CourseGradingAssignmentPair
     for pair in pairs:
+        pair_id = pair.id
         grader_email: str = pair.grader_email
         is_current_user: bool = grader_email == current_user.email
         if grader_email not in grader_to_details:
@@ -347,6 +349,7 @@ def format_grading_assignment_pairs(pairs: Sequence[CourseGradingAssignmentPair]
                 "submissions": []
             }
         grader_to_details[grader_email]["submissions"].append({
+            "pair_id": pair_id,
             "student_email": pair.student_email,
             "student_display_name": email_to_display_name.get(pair.student_email, "[Not in roster]"),
             "submission_url": pair.submission_url,
