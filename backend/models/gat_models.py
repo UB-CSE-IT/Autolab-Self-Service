@@ -92,6 +92,17 @@ class CourseGradingAssignment(Base):
     archived: Mapped[bool] = mapped_column(nullable=False, default=False)
     assessment_display_name: Mapped[str] = mapped_column(nullable=False)
 
+    def to_dict(self):
+        return {
+            "course": self.course.to_dict(),
+            "assessment_name": self.assessment_name,
+            "created_at": self.created_at.isoformat(),
+            "created_by_email": self.created_by_user.email,
+            "created_by_display_name": self.created_by_user.display_name,
+            "archived": self.archived,
+            "assessment_display_name": self.assessment_display_name,
+        }
+
 
 class CourseGradingAssignmentPair(Base):
     __tablename__ = "course_grading_assignment_pairs"
@@ -109,3 +120,14 @@ class CourseGradingAssignmentPair(Base):
     submission_version: Mapped[int] = mapped_column(nullable=False, default=0)
 
     UniqueConstraint(course_grading_assignment_id, grader_email, student_email)
+
+    def to_dict(self):
+        # This is less verbose than most because it will be called many times to build a list
+        return {
+            "grader_email": self.grader_email,
+            "student_email": self.student_email,
+            "submission_url": self.submission_url,
+            "completed": self.completed,
+            "student_display_name": self.student_display_name,
+            "submission_version": self.submission_version,
+        }

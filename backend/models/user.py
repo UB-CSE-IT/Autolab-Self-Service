@@ -57,6 +57,10 @@ class User(Base):
     def email(self):
         return f"{self.username}@buffalo.edu"
 
+    @property
+    def display_name(self):
+        return f"{self.first_name} {self.last_name}"
+
     @staticmethod
     def get_by_username(username: str) -> "User":
         logger.debug(f"Getting user by username {username}")

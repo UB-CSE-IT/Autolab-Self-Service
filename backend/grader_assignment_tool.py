@@ -616,3 +616,25 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
         "success": True,
         "data": ret
     })
+
+
+@gat.route("/course/<course_name>/grading-assignments/", methods=["GET"])
+def course_grading_assignments_view(course_name: str):
+    # Get all the grading assignments for a course ordered by creation date descending (newest first)
+
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+
+    course_grading_assignments: Sequence[CourseGradingAssignment] = \
+        g.db.query(CourseGradingAssignment).filter_by(course=course) \
+            .order_by(CourseGradingAssignment.created_at.desc()).all()
+
+    data = {
+        "course": course.to_dict(),
+        "grading_assignments": [grading_assignment.to_dict() for grading_assignment in course_grading_assignments],
+    }
+
+    return jsonify({
+        "success": True,
+        "data": data
+    })
