@@ -777,3 +777,37 @@ def course_grading_assignment_archive_view(course_name: str, assignment_id: int)
         "success": True,
         "data": assignment.to_dict()
     })
+
+
+@gat.route("/course/<course_name>/grading-assignments/<int:assignment_id>/pairs/<int:pair_id>/complete/",
+           methods=["POST", "DELETE"])
+def course_grading_assignment_pair_complete_view(course_name: str, assignment_id: int, pair_id: int):
+    # Mark a grading assignment pair as complete or incomplete (POST to complete, DELETE to incomplete)
+    # Only the grader assigned to the pair can mark it as complete (or portal admins)
+
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+
+    pair: CourseGradingAssignmentPair = g.db.query(CourseGradingAssignmentPair) \
+        .filter_by(course_grading_assignment_id=assignment_id, id=pair_id).first()
+
+    if pair is None or pair.course_grading_assignment.course != course:
+        abort(404, f"Grading assignment pair with ID {pair_id} does not exist for this grading assignment.")
+
+    if pair.grader_email != g.user.email and not g.user.is_admin:
+        abort(403, f"Only the assigned grader can update the completion status of a grading assignment.")
+
+    target_complete: bool = request.method == "POST"  # Do we want to complete (T) or incomplete (F) the pair?
+    if pair.completed == target_complete:
+        abort(400, f"Grading assignment pair with ID {pair_id} is already "
+                   f"{'completed' if pair.completed else 'incomplete'}.")
+
+    pair.completed = target_complete
+    g.db.commit()
+
+    logger.info(f"{'Completed' if target_complete else 'Incompleted'} grading assignment pair with ID {pair_id}.")
+
+    return jsonify({
+        "success": True,
+        "data": pair.to_dict()
+    })
