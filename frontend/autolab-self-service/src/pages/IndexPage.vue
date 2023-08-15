@@ -34,6 +34,11 @@
               Create a course
             </div>
           </router-link>
+          <router-link :to="{name: 'grader-assignment-tool'}" v-slot="{ navigate }">
+            <div class="element" role="link" @click="navigate">
+              Grader Assignment Tool (GAT)
+            </div>
+          </router-link>
           <!--          <div class="actions">-->
           <!--          </div>-->
         </div>

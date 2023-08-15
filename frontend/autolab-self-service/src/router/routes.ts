@@ -24,6 +24,48 @@ const routes: RouteRecordRaw[] = [
         name: 'tango-statistics',
         component: () => import('pages/TangoStatsPage.vue')
       },
+      {
+        path: 'gat',
+        children: [
+          {
+            path: '',
+            name: 'grader-assignment-tool',
+            component: () => import('pages/GraderAssignmentTool/CourseListPage.vue'),
+          },
+          {
+            path: ':courseName',
+            name: 'grader-assignment-tool-course',
+            component: () => import('pages/GraderAssignmentTool/CoursePage.vue'),
+          },
+          {
+            path: ':courseName/people',
+            name: 'grader-assignment-tool-people',
+            component: () => import('pages/GraderAssignmentTool/PeoplePage.vue'),
+          },
+          {
+            path: ':courseName/people/:user',
+            name: 'grader-assignment-tool-person',
+            component: () => import('pages/GraderAssignmentTool/PersonPage.vue'),
+          },
+          {
+            path: ':courseName/assignments',
+            name: 'grader-assignment-tool-assignments',
+            component: () => import('pages/GraderAssignmentTool/GradingAssignmentsListPage.vue'),
+          },
+          {
+            path: ':courseName/assignments/new',
+            name: 'grader-assignment-tool-new-assignment',
+            component: () => import('pages/GraderAssignmentTool/NewGradingAssignmentPage.vue'),
+          },
+          {
+            path: ':courseName/assignments/:assignmentId',
+            name: 'grader-assignment-tool-assignment',
+            component: () => import('pages/GraderAssignmentTool/GradingAssignmentPage.vue'),
+          }
+        ]
+      },
+
+
       // Always leave this as last one,
       // but you can also remove it
       {
