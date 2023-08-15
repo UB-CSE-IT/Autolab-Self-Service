@@ -1,9 +1,9 @@
 import logging
 import random
-from collections import defaultdict
+from collections import defaultdict, OrderedDict as ordereddict
 
 import cachetools.func
-from typing import Tuple, Optional, List, Sequence, Set, Dict, DefaultDict
+from typing import Tuple, Optional, List, Sequence, Set, Dict, DefaultDict, OrderedDict
 
 from flask import abort, current_app, jsonify
 from flask import Blueprint, g
@@ -299,6 +299,72 @@ def create_grading_assignments(
     return grader_submissions
 
 
+def format_grading_assignment_pairs(pairs: Sequence[CourseGradingAssignmentPair],
+                                    current_user: User,
+                                    course_users: Sequence[CourseUser]
+                                    ) -> List[Dict[str, any]]:
+    # Return the grading assignment pairs grouped by grader with `current_user` first (if they're a grader)
+    # This function does not sort the pairs, but it will preserve the order of the input if you sort them first
+    # `course_users` is used to look up the display name of each person (grader and student)
+
+    # Returns a list in the following format:
+    # [
+    #   {
+    #     "grader": {
+    #       "email": "grader@buffalo",
+    #       "display_name": "First Last",
+    #       "is_current_user": True,
+    #     },
+    #     "submissions": [
+    #       {
+    #         "student_email": "student@buffalo",
+    #         "student_display_name": "First Last",
+    #         "submission_url": "https://autolab.cse.buffalo.edu/courses/.../pdftest/submissions/22/view",
+    #         "submission_version": 3,
+    #         "completed": False,
+    #       }, ...
+    #     ]
+    #   }, ...
+    # ]
+
+    grader_to_details: OrderedDict[str, Dict[str, any]] = ordereddict()
+    email_to_display_name: Dict[str, str] = {}
+    course_user: CourseUser
+    for course_user in course_users:
+        email_to_display_name[course_user.email] = course_user.display_name
+
+    pair: CourseGradingAssignmentPair
+    for pair in pairs:
+        grader_email: str = pair.grader_email
+        is_current_user: bool = grader_email == current_user.email
+        if grader_email not in grader_to_details:
+            grader_to_details[grader_email] = {
+                "grader": {
+                    "email": grader_email,
+                    "display_name": email_to_display_name.get(grader_email, "[Not in roster]"),
+                    "is_current_user": is_current_user,
+                },
+                "submissions": []
+            }
+        grader_to_details[grader_email]["submissions"].append({
+            "student_email": pair.student_email,
+            "student_display_name": email_to_display_name.get(pair.student_email, "[Not in roster]"),
+            "submission_url": pair.submission_url,
+            "submission_version": pair.submission_version,
+            "completed": pair.completed,
+        })
+
+    # Build the list with the current user first
+    data: List[Dict[str, any]] = []
+    for grader_email, details in grader_to_details.items():
+        if grader_email == current_user.email:
+            data.insert(0, details)
+        else:
+            data.append(details)
+
+    return data
+
+
 # Require login for all routes in this blueprint
 @gat.before_request
 def require_login():
@@ -589,7 +655,6 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
     # Create the grading assignment pairs in the database
     for grader_email, submissions in grading_assignments.items():
         for submission in submissions:
-            student_display_name = submission["display_name"]
             student_email = submission["email"]
             student_version = submission["version"]
             student_url = submission["url"]
@@ -598,7 +663,6 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
                 grader_email=grader_email,
                 student_email=student_email,
                 submission_url=student_url,
-                student_display_name=student_display_name,
                 submission_version=student_version
             )
             g.db.add(course_grading_assignment_pair)
@@ -637,4 +701,47 @@ def course_grading_assignments_view(course_name: str):
     return jsonify({
         "success": True,
         "data": data
+    })
+
+
+@gat.route("/course/<course_name>/grading-assignments/<int:assignment_id>/", methods=["GET"])
+def course_grading_assignment_view(course_name: str, assignment_id: int):
+    # Get the details for a particular grading assignment by ID
+
+    course: Course = get_course_by_name_or_404(course_name)
+    ensure_user_is_grader_in_course(g.user, course)
+
+    course_grading_assignment: CourseGradingAssignment = \
+        g.db.query(CourseGradingAssignment).filter_by(id=assignment_id).first()
+
+    does_not_exist_message: str = f"Grading assignment with ID {assignment_id} does not exist in this course."
+
+    if course_grading_assignment is None:
+        logger.warning(f"Grading assignment with ID {assignment_id} does not exist anywhere.")
+        abort(404, does_not_exist_message)
+
+    if course_grading_assignment.course != course:
+        if g.user.is_admin:
+            abort(404, f"This grading assignment does not exist in this course. Since you're an admin, we'll let you "
+                       f"know that it exists in the course: {course_grading_assignment.course.name}.")
+        else:
+            logger.warning(f"Grading assignment with ID {assignment_id} does not exist in this course. "
+                           f"(It exists in {course_grading_assignment.course.name}.)")
+            abort(404, does_not_exist_message)
+
+    grading_assignment_pairs: Sequence[CourseGradingAssignmentPair] = \
+        g.db.query(CourseGradingAssignmentPair) \
+            .filter_by(course_grading_assignment=course_grading_assignment) \
+            .order_by(CourseGradingAssignmentPair.grader_email, CourseGradingAssignmentPair.student_email).all()
+
+    course_users: Sequence[CourseUser] = g.db.query(CourseUser).filter_by(course=course).all()
+
+    ret = {
+        "grading_assignment": course_grading_assignment.to_dict(),
+        "grading_assignment_pairs": format_grading_assignment_pairs(grading_assignment_pairs, g.user, course_users)
+    }
+
+    return jsonify({
+        "success": True,
+        "data": ret
     })

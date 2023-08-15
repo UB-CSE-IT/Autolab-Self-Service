@@ -94,6 +94,7 @@ class CourseGradingAssignment(Base):
 
     def to_dict(self):
         return {
+            "id": self.id,
             "course": self.course.to_dict(),
             "assessment_name": self.assessment_name,
             "created_at": self.created_at.isoformat(),
@@ -116,7 +117,6 @@ class CourseGradingAssignmentPair(Base):
     student_email: Mapped[str] = mapped_column(nullable=False)
     submission_url: Mapped[str] = mapped_column(nullable=False)
     completed: Mapped[bool] = mapped_column(nullable=False, default=False)
-    student_display_name: Mapped[str] = mapped_column(nullable=False)
     submission_version: Mapped[int] = mapped_column(nullable=False, default=0)
 
     UniqueConstraint(course_grading_assignment_id, grader_email, student_email)
@@ -128,6 +128,5 @@ class CourseGradingAssignmentPair(Base):
             "student_email": self.student_email,
             "submission_url": self.submission_url,
             "completed": self.completed,
-            "student_display_name": self.student_display_name,
             "submission_version": self.submission_version,
         }
