@@ -3,7 +3,7 @@ import {reactive} from "vue"
 interface PortalApiDataLoaderState<T> {
   loading: boolean
   loaded: boolean
-  error: string | null
+  error: string | undefined
   data: T | null
 }
 
@@ -24,7 +24,7 @@ export class PortalApiDataLoader<T> {
     this.state = reactive({
       loading: false,
       loaded: false,
-      error: null,
+      error: undefined,
       data: null,
     }) as PortalApiDataLoaderState<T>
   }
@@ -55,7 +55,7 @@ export class PortalApiDataLoader<T> {
       options.body = JSON.stringify(options.body)
     }
 
-    fetch(this.endpoint, options)
+    return fetch(this.endpoint, options)
       .then(response => response.json())
       .then(data => {
         if (data.success === false) {
@@ -63,7 +63,7 @@ export class PortalApiDataLoader<T> {
         }
         this.state.data = data.data
         this.state.loaded = true
-        this.state.error = null
+        this.state.error = undefined
       })
       .catch((error) => {
         this.state.error = error.message
