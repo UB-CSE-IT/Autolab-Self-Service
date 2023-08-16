@@ -382,7 +382,7 @@ def index_view():
 
 
 @gat.route("/my-autolab-courses/", methods=["GET"])
-@rate_limit_per_user(3, 10)  # 3 requests per 10 seconds
+@rate_limit_per_user(5, 10)  # 5 requests per 10 seconds
 def my_autolab_courses_view():
     courses = get_current_user_autolab_courses()
     ret = {
@@ -393,7 +393,7 @@ def my_autolab_courses_view():
 
 
 @gat.route("/create-course/<course_name>/", methods=["POST"])
-@rate_limit_per_user(3, 60)  # 3 requests per minute
+@rate_limit_per_user(5, 20)  # 5 requests per 20 seconds
 def create_course_view(course_name: str):
     # Given an Autolab course name, create a corresponding course in our database, if the user has permission
     in_course: bool
