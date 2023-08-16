@@ -71,7 +71,7 @@ def get_grader_courses(user: User) -> List[Course]:
         return list(g.db.query(Course).all())
 
     course_users = g.db.query(CourseUser).filter_by(email=user.email).all()
-    courses: List[Course] = [course_user.course for course_user in course_users]
+    courses: List[Course] = [course_user.course for course_user in course_users if course_user.is_grader()]
     return courses
 
 
