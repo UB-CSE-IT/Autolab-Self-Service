@@ -28,7 +28,7 @@ defineProps({
 @import 'src/css/quasar.variables.scss';
 
 
-:deep(.slot-wrapper *) {
+:deep(.slot-wrapper > *) {
   // Remove margin from all children of the slot
   margin: 0;
 }
@@ -36,10 +36,12 @@ defineProps({
 .theme {
   border-radius: 4px;
   padding: 16px;
+  color: black;
 
   &.default {
     // Default is useful for general information messages
     border: 1px solid $primary;
+    background-color: #e3f2fd;
 
     > .icon {
       color: $primary;
@@ -48,10 +50,19 @@ defineProps({
 
   &.error {
     background-color: #ffebee;
-    border: 1px solid #83000d;
+    border: 1px solid $negative;
 
     > .icon {
-      color: #83000d;
+      color: $negative;
+    }
+  }
+
+  &.success {
+    background-color: #e8f5e9;
+    border: 1px solid #1b5e20;
+
+    > .icon {
+      color: #1b5e20;
     }
   }
 
