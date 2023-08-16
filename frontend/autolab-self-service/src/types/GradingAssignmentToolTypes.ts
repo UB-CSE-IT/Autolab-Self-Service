@@ -28,3 +28,19 @@ export interface GatGradingAssignmentsResponse {
   course: GatCourse
   grading_assignments: GatGradingAssignment[]
 }
+
+export interface GatCourseUser {
+  display_name: string
+  email: string
+  grading_hours: number
+  is_current_user?: boolean
+  is_grader: boolean
+  role: string
+}
+
+export interface GatCourseUsersResponse {
+  course: GatCourse
+  current_user_in_graders_roster: boolean
+  graders: GatCourseUser[]
+  students: GatCourseUser[]
+}

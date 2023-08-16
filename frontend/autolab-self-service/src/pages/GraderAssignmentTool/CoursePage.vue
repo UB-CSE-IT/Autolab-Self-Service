@@ -29,10 +29,6 @@
     </ApiFetchContentContainer>
     <div style="height: 200px;"></div>
 
-    <hr>
-    <p>Debug:</p>
-    {{ courseLoader.state }}
-
   </q-page>
 </template>
 
