@@ -385,7 +385,11 @@ def index_view():
 @rate_limit_per_user(3, 10)  # 3 requests per 10 seconds
 def my_autolab_courses_view():
     courses = get_current_user_autolab_courses()
-    return jsonify(courses)
+    ret = {
+        "success": True,
+        "data": courses
+    }
+    return jsonify(ret)
 
 
 @gat.route("/create-course/<course_name>/", methods=["POST"])
