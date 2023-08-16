@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 from logging.handlers import RotatingFileHandler
 from flask import Flask, Blueprint, jsonify, request, make_response, g, redirect, abort
 from dotenv import load_dotenv
@@ -173,7 +174,7 @@ def dev_login():
     if user_data is None:
         first_name = f"{username.capitalize()} (dev)"
         last_name = "Last (dev)"
-        person_number = "00000000"
+        person_number = str(int(random.random() * 90000000) + 10000000)
         # return jsonify({
         #     "success": False,
         #     "error": "User does not exist."
