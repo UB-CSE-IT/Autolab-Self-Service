@@ -1,8 +1,12 @@
 <template>
   <q-page class="q-px-lg q-mx-auto" style="max-width: 1000px;">
-    <h3>Grader Assignment Tool</h3>
+    <div class="button-row q-my-lg">
+      <q-btn icon="west" label="Back to portal home" color="primary" :to="{name: 'index'}"/>
+    </div>
 
+    <h3>Grader Assignment Tool</h3>
     <h4 class="q-mb-sm">Your Courses</h4>
+
     <p>Here are the courses that have already been imported from Autolab. You can only view courses where you're an
       instructor or course assistant.</p>
     <ApiFetchContentContainer :api-data-loader="courseLoader" loading-text="Loading your courses">
@@ -63,7 +67,7 @@ function courseImported(course: GatCourse) {
   border-radius: 8px;
   padding: 16px;
   margin: 8px 0;
-  color: $primary;
+  color: black;
 
   p {
     margin: 0;
@@ -74,7 +78,7 @@ function courseImported(course: GatCourse) {
   }
 
   &:hover {
-    background-color: #eef5ff;
+    background-color: $hover;
   }
 
 }

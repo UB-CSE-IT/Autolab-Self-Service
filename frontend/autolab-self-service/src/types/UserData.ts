@@ -3,4 +3,5 @@ export interface UserData {
   firstName: string
   lastName: string
   isAdmin: boolean
+  email: string
 }
