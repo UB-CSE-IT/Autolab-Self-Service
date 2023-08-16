@@ -36,7 +36,7 @@ class CourseUser(Base):
     # Note that the "user" may not exist in our database, so we can only store their email address
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), nullable=False)
+    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     course: Mapped["Course"] = relationship()
     email: Mapped[str] = mapped_column(nullable=False)
     display_name: Mapped[str] = mapped_column(nullable=False)
