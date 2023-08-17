@@ -1,7 +1,7 @@
 <template>
-  <div class="row wrap container theme" :class="theme">
+  <div class="row no-wrap container theme" :class="theme">
     <q-icon v-if="icon !== ''" class="q-mr-lg icon" :name="icon" :size="iconSize"/>
-    <div class="col-grow items-center slot-wrapper">
+    <div class="items-center slot-wrapper">
       <slot/>
     </div>
   </div>

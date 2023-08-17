@@ -44,7 +44,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/GraderAssignmentTool/PeoplePage.vue'),
           },
           {
-            path: ':courseName/people/:user',
+            path: ':courseName/people/:user/', // The trailing slash is required for the . in the email address
             name: 'grader-assignment-tool-person',
             component: () => import('pages/GraderAssignmentTool/PersonPage.vue'),
           },

@@ -44,3 +44,14 @@ export interface GatCourseUsersResponse {
   graders: GatCourseUser[]
   students: GatCourseUser[]
 }
+
+export interface GatCoursePersonResponse {
+  conflicts_of_interest: string[] // Array of email addresses
+  course: GatCourse
+  user: GatCourseUser
+}
+
+export interface GatConflictOfInterestResponse {
+  grader_email: string
+  student_email: string
+}

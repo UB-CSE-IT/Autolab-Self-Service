@@ -605,6 +605,9 @@ def course_user_view(course_name: str, user_email: str):
         "conflicts_of_interest": conflicts_of_interest_emails
     }
 
+    if course_user.email == g.user.email:
+        data["user"]["is_current_user"] = True
+
     return jsonify({
         "success": True,
         "data": data

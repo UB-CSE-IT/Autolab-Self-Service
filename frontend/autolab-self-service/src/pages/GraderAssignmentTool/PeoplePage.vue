@@ -21,6 +21,11 @@
         Roster synced successfully.
       </BannerWithIcon>
 
+      <BannerWithIcon icon="info">
+        <h6>Beta</h6>
+        <p>This is a very early UI design, it needs a lot of work.</p>
+      </BannerWithIcon>
+
       <h5>Graders</h5>
       <PersonListElement :user="user" v-for="user in peopleLoader.state.data.graders" :key="user.email"/>
 
