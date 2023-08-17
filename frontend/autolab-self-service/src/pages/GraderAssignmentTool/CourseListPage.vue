@@ -40,11 +40,11 @@
 </template>
 
 <script setup lang="ts">
-import {PortalApiDataLoader} from "src/utilities/PortalApiDataLoader"
-import ApiFetchContentContainer from "components/ApiFetchContentContainer.vue"
-import {GatAutolabCoursesResponse, GatCourse} from "src/types/GradingAssignmentToolTypes";
-import BannerWithIcon from "components/BannerWithIcon.vue";
-import AutolabCourseListElement from "components/AutolabCourseListElement.vue";
+import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
+import ApiFetchContentContainer from 'components/ApiFetchContentContainer.vue'
+import {GatAutolabCoursesResponse, GatCourse} from 'src/types/GradingAssignmentToolTypes'
+import BannerWithIcon from 'components/BannerWithIcon.vue'
+import AutolabCourseListElement from 'components/AutolabCourseListElement.vue'
 
 const courseLoader = new PortalApiDataLoader<GatCourse[]>('/portal/api/gat/my-courses/')
 courseLoader.fetch()

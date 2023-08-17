@@ -37,12 +37,12 @@
 
 <script setup lang="ts">
 
-import {useRoute} from "vue-router";
-import {PortalApiDataLoader} from "src/utilities/PortalApiDataLoader";
-import ApiFetchContentContainer from "components/ApiFetchContentContainer.vue";
-import {GatCourseUsersResponse} from "src/types/GradingAssignmentToolTypes";
-import BannerWithIcon from "components/BannerWithIcon.vue";
-import PersonListElement from "components/PersonListElement.vue";
+import {useRoute} from 'vue-router'
+import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
+import ApiFetchContentContainer from 'components/ApiFetchContentContainer.vue'
+import {GatCourseUsersResponse} from 'src/types/GradingAssignmentToolTypes'
+import BannerWithIcon from 'components/BannerWithIcon.vue'
+import PersonListElement from 'components/PersonListElement.vue'
 
 const courseName = useRoute().params.courseName
 

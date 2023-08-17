@@ -34,13 +34,13 @@
 
 <script setup lang="ts">
 
-import {useRoute} from "vue-router";
-import {PortalApiDataLoader} from "src/utilities/PortalApiDataLoader";
-import ApiFetchContentContainer from "components/ApiFetchContentContainer.vue";
-import {GatGradingAssignmentsResponse} from "src/types/GradingAssignmentToolTypes";
-import {useUserStore} from "stores/UserStore";
-import GradingAssignmentListElement from "components/GradingAssignmentListElement.vue";
-import BannerWithIcon from "components/BannerWithIcon.vue";
+import {useRoute} from 'vue-router'
+import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
+import ApiFetchContentContainer from 'components/ApiFetchContentContainer.vue'
+import {GatGradingAssignmentsResponse} from 'src/types/GradingAssignmentToolTypes'
+import {useUserStore} from 'stores/UserStore'
+import GradingAssignmentListElement from 'components/GradingAssignmentListElement.vue'
+import BannerWithIcon from 'components/BannerWithIcon.vue'
 
 const courseName = useRoute().params.courseName
 const userStore = useUserStore()
