@@ -19,7 +19,7 @@
 
 import {PropType} from "vue";
 import {GatGradingAssignment} from "src/types/GradingAssignmentToolTypes"
-import {isoDateToLocaleString} from "../utilities/DataFormatter";
+import {isoDateToLocaleString} from 'src/utilities/DataFormatter';
 
 const props = defineProps({
   gradingAssignment: {

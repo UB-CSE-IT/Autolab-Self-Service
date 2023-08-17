@@ -11,17 +11,21 @@
         {{ personLoader.state.data.course.display_name }}
       </p>
 
-      <BannerWithIcon icon="info">
-        <h6>Beta</h6>
-        <p>This is a very early UI design, it needs a lot of work. </p>
-      </BannerWithIcon>
-      <BannerWithIcon icon="developer_mode">
-        <p>{{ personLoader }}</p>
-        <p>Conflicts: {{ state.conflictsOfInterest }}</p>
-      </BannerWithIcon>
-
-      <PersonListElement style="border: 2px solid red;"
-                         :user="personLoader.state.data.user"></PersonListElement>
+      <q-markup-table>
+        <thead>
+        <tr style="text-align: left">
+          <th>Name</th>
+          <th>Email Address</th>
+          <th v-if="personLoader.state.data.user.is_grader">Hours</th>
+        </tr>
+        </thead>
+        <tbody>
+        <PersonRow :user="personLoader.state.data.user"
+                   :show-hours="personLoader.state.data.user.is_grader"
+                   :show-conflicts="false"
+        />
+        </tbody>
+      </q-markup-table>
 
       <ApiFetchContentContainer :api-data-loader="peopleLoader" loading-text="Loading conflicts of interest">
         <h5 class="q-mb-sm">Conflicts of Interest</h5>
@@ -33,7 +37,7 @@
           <tr style="text-align: left">
             <th>Name</th>
             <th>Email Address</th>
-            <th>Conflict</th>
+            <th>Conflict with {{ personLoader.state.data.user.display_name }}</th>
           </tr>
           </thead>
           <tbody>
@@ -63,10 +67,9 @@ import ApiFetchContentContainer from 'components/ApiFetchContentContainer.vue'
 import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 import {GatCoursePersonResponse, GatCourseUser, GatCourseUsersResponse} from 'src/types/GradingAssignmentToolTypes'
 import {useRoute} from 'vue-router'
-import PersonListElement from 'components/PersonListElement.vue'
-import BannerWithIcon from 'components/BannerWithIcon.vue'
 import {reactive} from 'vue'
-import ConflictOfInterestRow from 'pages/GraderAssignmentTool/ConflictOfInterestRow.vue'
+import ConflictOfInterestRow from 'components/GraderAssignmentTool/ConflictOfInterestRow.vue'
+import PersonRow from 'components/GraderAssignmentTool/PersonRow.vue'
 
 const courseName = useRoute().params.courseName
 const userEmailAddress = useRoute().params.user

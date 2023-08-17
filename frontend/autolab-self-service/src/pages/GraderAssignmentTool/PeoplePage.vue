@@ -21,17 +21,42 @@
         Roster synced successfully.
       </BannerWithIcon>
 
-      <BannerWithIcon icon="info">
-        <h6>Beta</h6>
-        <p>This is a very early UI design, it needs a lot of work.</p>
-      </BannerWithIcon>
-
       <h5>Graders</h5>
-      <PersonListElement :user="user" v-for="user in peopleLoader.state.data.graders" :key="user.email"/>
+      <q-markup-table>
+        <thead>
+        <tr style="text-align: left">
+          <th>Name</th>
+          <th>Email Address</th>
+          <th>Hours</th>
+          <th>Conflicts</th>
+        </tr>
+        </thead>
+        <tbody>
+        <PersonRow v-for="user in peopleLoader.state.data.graders"
+                   :key="user.email"
+                   :user="user"
+        />
+        </tbody>
+      </q-markup-table>
 
       <h5>Students</h5>
-      <PersonListElement :user="user" v-for="user in peopleLoader.state.data.students" :key="user.email"/>
-
+      <q-markup-table>
+        <thead>
+        <tr style="text-align: left">
+          <th>Name</th>
+          <th>Email Address</th>
+          <th>Conflicts</th>
+        </tr>
+        </thead>
+        <tbody>
+        <PersonRow
+          v-for="user in peopleLoader.state.data.students"
+          :key="user.email"
+          :user="user"
+          :show-hours="false"
+        />
+        </tbody>
+      </q-markup-table>
 
     </ApiFetchContentContainer>
 
@@ -47,7 +72,7 @@ import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 import ApiFetchContentContainer from 'components/ApiFetchContentContainer.vue'
 import {GatCourseUsersResponse} from 'src/types/GradingAssignmentToolTypes'
 import BannerWithIcon from 'components/BannerWithIcon.vue'
-import PersonListElement from 'components/PersonListElement.vue'
+import PersonRow from 'components/GraderAssignmentTool/PersonRow.vue'
 
 const courseName = useRoute().params.courseName
 
