@@ -424,7 +424,7 @@ def create_course_view(course_name: str):
 
 
 @gat.route("/my-courses/", methods=["GET"])
-@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
+@rate_limit_per_user(6, 5)  # 6 requests per 5 seconds
 def my_courses_view():
     courses = get_grader_courses(g.user)
     return jsonify({
@@ -434,7 +434,7 @@ def my_courses_view():
 
 
 @gat.route("/course/<course_name>/autolab-sync/", methods=["POST"])
-@rate_limit_per_user(3, 60)  # 3 requests per minute
+@rate_limit_per_user(1, 10)  # 1 request per 10 seconds
 def course_autolab_sync_view(course_name: str):
     # The `sync_roster_from_autolab` function handles permission checking and will raise an exception on failure
     sync_roster_from_autolab(course_name)
@@ -444,7 +444,7 @@ def course_autolab_sync_view(course_name: str):
 
 
 @gat.route("/course/<course_name>/users/", methods=["GET"])
-@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
+@rate_limit_per_user(10, 5)  # 10 requests per 5 seconds
 def course_users_view(course_name: str):
     # Returns a list of graders and students in the course, with the current user first (if they are a grader)
     course: Course = get_course_by_name_or_404(course_name)
@@ -582,7 +582,7 @@ def course_delete_conflict_of_interest_view(course_name: str, grader_email: str,
 
 
 @gat.route("/course/<course_name>/users/<user_email>/", methods=["GET"])
-@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
+@rate_limit_per_user(6, 5)  # 6 requests per 5 seconds
 def course_user_view(course_name: str, user_email: str):
     # Get a user in a course
     course: Course = get_course_by_name_or_404(course_name)
@@ -615,7 +615,7 @@ def course_user_view(course_name: str, user_email: str):
 
 
 @gat.route("/course/<course_name>/autolab-assessments/", methods=["GET"])
-@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
+@rate_limit_per_user(6, 5)  # 6 requests per 5 seconds
 def course_autolab_assessments_view(course_name: str):
     # Get all Autolab assessments in a course. Requires being a grader in the course locally and on Autolab.
     course: Course = get_course_by_name_or_404(course_name)
@@ -705,7 +705,7 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
 
 
 @gat.route("/course/<course_name>/grading-assignments/", methods=["GET"])
-@rate_limit_per_user(3, 5)  # 3 requests per 5 seconds
+@rate_limit_per_user(6, 5)  # 6 requests per 5 seconds
 def course_grading_assignments_view(course_name: str):
     # Get all the grading assignments for a course ordered by creation date descending (newest first)
 
@@ -728,7 +728,7 @@ def course_grading_assignments_view(course_name: str):
 
 
 @gat.route("/course/<course_name>/grading-assignments/<int:assignment_id>/", methods=["GET"])
-@rate_limit_per_user(3, 10)  # 3 requests per 10 seconds
+@rate_limit_per_user(6, 10)  # 6 requests per 10 seconds
 def course_grading_assignment_view(course_name: str, assignment_id: int):
     # Get the details for a particular grading assignment by ID
 
