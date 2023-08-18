@@ -1,4 +1,4 @@
-import {RouteRecordRaw} from 'vue-router';
+import {RouteRecordRaw} from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -8,22 +8,22 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'index',
-        component: () => import('pages/IndexPage.vue')
+        component: () => import('pages/IndexPage.vue'),
       },
       {
         path: 'create-course',
         name: 'create-course',
-        component: () => import('pages/CreateCoursePage.vue')
+        component: () => import('pages/CreateCoursePage.vue'),
       },
       {
         path: 'become-admin',
         name: 'become-admin',
-        component: () => import('pages/BecomeAdminPage.vue')
+        component: () => import('pages/BecomeAdminPage.vue'),
       },
       {
         path: 'tango-statistics',
         name: 'tango-statistics',
-        component: () => import('pages/TangoStatsPage.vue')
+        component: () => import('pages/TangoStatsPage.vue'),
       },
       {
         path: 'gat',
@@ -55,15 +55,20 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: ':courseName/assignments/new',
-            name: 'grader-assignment-tool-new-assignment',
-            component: () => import('pages/GraderAssignmentTool/NewGradingAssignmentPage.vue'),
+            name: 'grader-assignment-tool-autolab-assessments',
+            component: () => import('pages/GraderAssignmentTool/AutolabAssessmentsPage.vue'),
+          },
+          {
+            path: ':courseName/assignments/new/:assessmentName',
+            name: 'grader-assignment-tool-create-new-assignment',
+            component: () => import('pages/GraderAssignmentTool/CreateNewGradingAssignmentPage.vue'),
           },
           {
             path: ':courseName/assignments/:assignmentId',
             name: 'grader-assignment-tool-assignment',
             component: () => import('pages/GraderAssignmentTool/GradingAssignmentPage.vue'),
-          }
-        ]
+          },
+        ],
       },
 
 
@@ -77,6 +82,6 @@ const routes: RouteRecordRaw[] = [
   },
 
 
-];
+]
 
-export default routes;
+export default routes

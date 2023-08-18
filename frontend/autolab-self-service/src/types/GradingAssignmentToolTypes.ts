@@ -55,3 +55,20 @@ export interface GatConflictOfInterestResponse {
   grader_email: string
   student_email: string
 }
+
+export interface GatAutolabAssessment {
+  display_name: string
+  name: string
+  url: string
+}
+
+export interface GatAutolabAssessmentsResponse {
+  assessments: GatAutolabAssessment[]
+  course: GatCourse
+}
+
+
+export interface GatCreateGradingAssignmentResponse {
+  id: number
+  course: GatCourse
+}
