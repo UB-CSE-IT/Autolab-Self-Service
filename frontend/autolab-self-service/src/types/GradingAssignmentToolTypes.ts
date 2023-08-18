@@ -72,3 +72,28 @@ export interface GatCreateGradingAssignmentResponse {
   id: number
   grading_assignment: GatGradingAssignment
 }
+
+export interface GatGrader {
+  display_name: string
+  email: string
+  is_current_user: boolean
+}
+
+export interface GatGradingAssignmentPairSubmission {
+  completed: boolean
+  pair_id: number
+  student_display_name: string
+  student_email: string
+  submission_url: string
+  submission_version: number
+}
+
+export interface GatGraderSubmissions {
+  grader: GatGrader
+  submissions: GatGradingAssignmentPairSubmission[]
+}
+
+export interface GatGradingAssignmentResponse {
+  grading_assignment: GatGradingAssignment
+  grading_assignment_pairs: GatGraderSubmissions[]
+}

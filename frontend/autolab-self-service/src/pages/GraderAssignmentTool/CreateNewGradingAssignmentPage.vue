@@ -7,18 +7,23 @@
     </div>
 
     <template v-if="confirmed">
-      <ApiFetchContentContainer :api-data-loader="createAssessmentLoader" loading-text="Creating grading assignment">
+      <ApiFetchContentContainer :api-data-loader="createAssessmentLoader"
+                                loading-text="Creating grading assignment">
         <h4 class="q-mb-sm">Success!</h4>
         <p>Here's your new grading assignment.</p>
 
-        <GradingAssignmentListElement
-            v-if="createAssessmentLoader.state.data"
-            :grading-assignment="createAssessmentLoader.state.data.grading_assignment"
-        />
+        <RouterLink
+            :to="{name: 'grader-assignment-tool-assignment', params: {assignmentId: createAssessmentLoader.state.data?.id}}"
+        >
+          <GradingAssignmentListElement
+              v-if="createAssessmentLoader.state.data"
+              :grading-assignment="createAssessmentLoader.state.data.grading_assignment"
+          />
+        </RouterLink>
       </ApiFetchContentContainer>
     </template>
     <template v-else>
-      <h4>Confirmation</h4>
+      <h4 class="q-mb-sm">Confirmation</h4>
       <p>Please confirm you want to create a new grading assignment for "<b>{{ assessmentName }}</b>".</p>
       <q-btn label="Confirm" icon="check" color="primary" @click="confirm"/>
     </template>

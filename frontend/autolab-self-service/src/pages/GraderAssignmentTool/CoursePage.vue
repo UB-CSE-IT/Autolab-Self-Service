@@ -16,19 +16,22 @@
 
       <h5>Grading Assignments</h5>
 
-      <GradingAssignmentListElement :grading-assignment="assignment"
-                                    v-for="assignment in courseLoader.state.data?.grading_assignments"
-                                    :key="assignment.id"/>
+      <RouterLink
+        v-for="assignment in courseLoader.state.data?.grading_assignments"
+        :key="assignment.id"
+        :to="{name: 'grader-assignment-tool-assignment', params: {assignmentId: assignment.id}}"
+      >
+        <GradingAssignmentListElement :grading-assignment="assignment"/>
+      </RouterLink>
 
       <div v-if="courseLoader.state.data?.grading_assignments.length === 0">
         <BannerWithIcon icon="sentiment_dissatisfied">
           <p>No grading assignments have been created yet.</p>
         </BannerWithIcon>
       </div>
-
     </ApiFetchContentContainer>
-    <div style="height: 200px;"></div>
 
+    <div style="height: 200px;"></div>
   </q-page>
 </template>
 
