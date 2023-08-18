@@ -696,6 +696,7 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
 
     ret = {
         "id": course_grading_assignment.id,
+        "course": course.to_dict(),
     }
 
     return jsonify({
