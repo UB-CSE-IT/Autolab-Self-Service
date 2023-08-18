@@ -251,6 +251,8 @@ def create_grading_assignments(
     logger.debug(f"Grader to hours: {grader_to_hours}")
     total_hours: int = sum(grader_to_hours.values())
     logger.debug(f"Total hours: {total_hours}")
+    if total_hours == 0:
+        abort(400, "The sum of grader hours is 0. Please set grader hours for at least one grader.")
     total_submissions: int = len(submissions)
     logger.debug(f"Total submissions: {total_submissions}")
     grader_submissions_count: Dict[str, int] = {}
@@ -283,8 +285,14 @@ def create_grading_assignments(
         grader_weights: List[int] = [grader_submissions_count[grader] for grader in viable_graders]
         logger.debug(f"Grader weights for {student}: {grader_weights}")
         # Choose a random grader based on the weights
-        grader: str = random.choices(viable_graders, weights=grader_weights, k=1)[0]
-        # ^ Raises ValueError if all weights are 0 or IndexError if there are no weights (no viable graders)
+        try:
+            grader: str = random.choices(viable_graders, weights=grader_weights, k=1)[0]
+            # ^ Raises ValueError if all weights are 0 or IndexError if there are no weights (no viable graders)
+        except (ValueError, IndexError):
+            abort(400, f"Failed to assign grader for {student}. No viable graders remaining. "
+                       f"Please verify this student's conflicts of interest.")
+            return ""  # Just to make the IDE happy
+
         logger.debug(f"Selected grader for student {student}: {grader}")
         # Subtract 1 from the grader's submissions count
         grader_submissions_count[grader] -= 1
