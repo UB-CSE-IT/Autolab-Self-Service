@@ -70,5 +70,5 @@ export interface GatAutolabAssessmentsResponse {
 
 export interface GatCreateGradingAssignmentResponse {
   id: number
-  course: GatCourse
+  grading_assignment: GatGradingAssignment
 }
