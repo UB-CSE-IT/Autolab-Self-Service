@@ -1,13 +1,12 @@
 <template>
   <tr>
-    <td>{{ targetUser.display_name }}</td>
+    <td>{{ targetUser.display_name }}<YouBadge v-if="isCurrentUser"/></td>
     <td>{{ targetUser.email }}</td>
     <td>
       <q-checkbox v-model="state.conflictOfInterest"
                   :disable="conflictLoader.state.loading"
                   style="width: 150px"
                   @update:modelValue="updateConflictOfInterest($event)">
-
         <div>
           <span v-if="conflictLoader.state.loading"><q-icon name="upload" class="q-mr-sm"/>Saving...</span>
           <span v-else-if="state.updated">
@@ -30,6 +29,8 @@
 import {GatConflictOfInterestResponse, GatCourse, GatCourseUser} from 'src/types/GradingAssignmentToolTypes'
 import {PropType, reactive} from 'vue'
 import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
+import {useUserStore} from 'stores/UserStore'
+import YouBadge from 'components/YouBadge.vue'
 
 const props = defineProps({
   targetUser: {
@@ -57,6 +58,9 @@ const state = reactive({
   updated: false,
   success: false,
 })
+
+const userStore = useUserStore()
+const isCurrentUser = userStore.userData.email === props.targetUser.email
 
 const conflictLoader = new PortalApiDataLoader<GatConflictOfInterestResponse>('')
 

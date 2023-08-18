@@ -1,6 +1,8 @@
 <template>
   <tr>
-    <td v-if="showName">{{ user.display_name }}</td>
+    <td v-if="showName">{{ user.display_name }}
+      <YouBadge v-if="isCurrentUser"/>
+    </td>
     <td v-if="showEmail">{{ user.email }}</td>
     <td v-if="showHours" class="row no-wrap content-center items-center" style="min-width: 200px;">
       <q-input dense
@@ -35,11 +37,14 @@
 <script setup lang="ts">
 
 import {GatCourseUser} from 'src/types/GradingAssignmentToolTypes'
-import {PropType, reactive, ref, watch} from 'vue'
+import {computed, PropType, reactive, ref, watch} from 'vue'
 import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 import {useRoute} from 'vue-router'
+import {useUserStore} from 'stores/UserStore'
+import YouBadge from 'components/YouBadge.vue'
 
 const courseName = useRoute().params.courseName
+const userStore = useUserStore()
 
 const props = defineProps({
   user: {
@@ -63,6 +68,8 @@ const props = defineProps({
     default: true,
   },
 })
+
+const isCurrentUser = computed(() => userStore.userData.email == props.user.email)
 
 const hours = ref(props.user.grading_hours?.toString() ?? '')
 const serverHours = ref(null as number | null)
