@@ -16,12 +16,13 @@
         <tr style="text-align: left">
           <th>Name</th>
           <th>Email Address</th>
-          <th v-if="personLoader.state.data.user.is_grader">Hours</th>
+          <th v-if="personLoader.state.data?.user.is_grader">Hours</th>
         </tr>
         </thead>
         <tbody>
-        <PersonRow :user="personLoader.state.data.user"
-                   :show-hours="personLoader.state.data.user.is_grader"
+        <PersonRow v-if="personLoader.state.data"
+                   :user="personLoader.state.data.user"
+                   :show-hours="personLoader.state.data?.user.is_grader"
                    :show-conflicts="false"
         />
         </tbody>
@@ -41,18 +42,17 @@
           </tr>
           </thead>
           <tbody>
-          <ConflictOfInterestRow v-for="user in state.roster" :key="user.email"
-                                 :current-user="personLoader.state.data.user"
-                                 :course="personLoader.state.data.course"
-                                 :target-user="user"
-                                 :initially-conflict-of-interest="state.conflictsOfInterest.includes(user.email)"
-          />
+          <template v-if="personLoader.state.data && peopleLoader.state.data">
+            <ConflictOfInterestRow
+              v-for="user in state.roster" :key="user.email"
+              :current-user="personLoader.state.data.user"
+              :course="personLoader.state.data.course"
+              :target-user="user"
+              :initially-conflict-of-interest="state.conflictsOfInterest.includes(user.email)"
+            />
+          </template>
           </tbody>
-
-
         </q-markup-table>
-
-
       </ApiFetchContentContainer>
     </ApiFetchContentContainer>
 

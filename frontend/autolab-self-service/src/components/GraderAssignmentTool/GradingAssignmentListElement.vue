@@ -1,7 +1,7 @@
 <template>
   <RouterLink :to="{name: 'grader-assignment-tool-assignment', params: {assignmentId: gradingAssignment.id}}">
 
-    <div class="element" :class="props.gradingAssignment.archived ? 'archived': ''">
+    <div class="element" :class="props.gradingAssignment?.archived ? 'archived': ''">
       <q-badge rounded color="primary" label="Archived" v-if="gradingAssignment.archived"/>
 
       <p class="text-h5">{{ props.gradingAssignment.assessment_display_name }}

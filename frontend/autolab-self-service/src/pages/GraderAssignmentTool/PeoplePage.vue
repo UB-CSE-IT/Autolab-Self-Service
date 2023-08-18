@@ -32,7 +32,7 @@
         </tr>
         </thead>
         <tbody>
-        <PersonRow v-for="user in peopleLoader.state.data.graders"
+        <PersonRow v-for="user in peopleLoader.state.data?.graders"
                    :key="user.email"
                    :user="user"
         />
@@ -50,7 +50,7 @@
         </thead>
         <tbody>
         <PersonRow
-          v-for="user in peopleLoader.state.data.students"
+          v-for="user in peopleLoader.state.data?.students"
           :key="user.email"
           :user="user"
           :show-hours="false"

@@ -10,7 +10,7 @@
     <p>Here are the courses that have already been imported from Autolab. You can only view courses where you're an
       instructor or course assistant.</p>
     <ApiFetchContentContainer :api-data-loader="courseLoader" loading-text="Loading your courses">
-      <BannerWithIcon theme="error" icon="error" v-if="courseLoader.state.data.length === 0">
+      <BannerWithIcon theme="error" icon="error" v-if="courseLoader.state.data?.length === 0">
         <p>You don't belong to any courses. You can import one from Autolab below.</p>
       </BannerWithIcon>
       <div v-else v-for="course in courseLoader.state.data" :key="course.name">
@@ -27,10 +27,10 @@
     <p>Here are the courses you're enrolled in on Autolab. You can import a course to the portal if you're an instructor
       or course assistant in it. This data is cached aggressively, so it may take a few minutes to update.</p>
     <ApiFetchContentContainer :api-data-loader="autolabCourseLoader" loading-text="Loading your Autolab courses">
-      <BannerWithIcon theme="error" icon="error" v-if="autolabCourseLoader.state.data.length === 0">
+      <BannerWithIcon theme="error" icon="error" v-if="autolabCourseLoader.state.data?.courses.length === 0">
         <p>You aren't in any courses on Autolab.</p>
       </BannerWithIcon>
-      <div v-else v-for="course in autolabCourseLoader.state.data.courses" :key="course.name">
+      <div v-else v-for="course in autolabCourseLoader.state.data?.courses" :key="course.name">
         <AutolabCourseListElement @courseImported="courseImported" :course="course"/>
       </div>
     </ApiFetchContentContainer>

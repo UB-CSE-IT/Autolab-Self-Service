@@ -1,9 +1,9 @@
 <template>
   <div>
-    <FullWidthLoading v-if="apiDataLoader.state.loading">
+    <FullWidthLoading v-if="apiDataLoader?.state.loading">
       <p>{{ loadingText }}</p>
     </FullWidthLoading>
-    <FullWidthError v-else-if="apiDataLoader.state.error">
+    <FullWidthError v-else-if="apiDataLoader?.state.error">
       <p>{{ apiDataLoader.state.error }}</p>
     </FullWidthError>
     <slot v-else/>
