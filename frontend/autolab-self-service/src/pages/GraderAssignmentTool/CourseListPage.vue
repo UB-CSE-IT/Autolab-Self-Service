@@ -11,16 +11,29 @@
       instructor or course assistant.</p>
     <ApiFetchContentContainer :api-data-loader="courseLoader" loading-text="Loading your courses">
       <BannerWithIcon icon="info" v-if="courseLoader.state.data?.length === 0">
-        <p>You don't belong to any courses using the Grader Assignment Tool. You may be able to import one from Autolab below.</p>
+        <p>You don't belong to any courses using the Grader Assignment Tool. You may be able to import one from Autolab
+          below.</p>
       </BannerWithIcon>
-      <div v-else v-for="course in courseLoader.state.data" :key="course.name">
-        <RouterLink :to="{name: 'grader-assignment-tool-course', params: {courseName: course.name}}">
-          <div class="course-box">
-            <p class="text-h5">{{ course.display_name }}</p>
-            <p class="text-h6 subtext">({{ course.name }})</p>
-          </div>
-        </RouterLink>
+
+
+      <div class="flex" v-else>
+        <div v-for="course in courseLoader.state.data" :key="course.name">
+          <RouterLink :to="{name: 'grader-assignment-tool-course', params: {courseName: course.name}}">
+            <div class="autolab-card">
+              <div class="header">
+                {{ course.display_name }}
+              </div>
+              <div class="element text-black">
+                ({{ course.name }})
+              </div>
+              <div class="actions">
+                <q-btn label="Open" flat />
+              </div>
+            </div>
+          </RouterLink>
+        </div>
       </div>
+
     </ApiFetchContentContainer>
 
     <h4 class="q-mb-sm">Import from Autolab</h4>
@@ -30,7 +43,12 @@
       <BannerWithIcon icon="info" v-if="autolabCourseLoader.state.data?.courses.length === 0">
         <p>You aren't enrolled in any courses on Autolab.</p>
       </BannerWithIcon>
-      <div v-else v-for="course in autolabCourseLoader.state.data?.courses" :key="course.name">
+      <div
+          class="q-mb-md"
+          v-else
+          v-for="course in autolabCourseLoader.state.data?.courses"
+          :key="course.name"
+      >
         <AutolabCourseListElement @courseImported="courseImported" :course="course"/>
       </div>
     </ApiFetchContentContainer>
@@ -63,7 +81,8 @@ function courseImported(course: GatCourse) {
 
 :deep(.course-box) {
   // Deep applies to subcomponents (AutolabCourseListElement)
-  border: 2px solid $primary;
+  border: 1px solid $primary;
+  border-left: 12px solid $primary;
   border-radius: 8px;
   padding: 16px;
   margin: 8px 0;
@@ -76,10 +95,5 @@ function courseImported(course: GatCourse) {
   .subtext {
     color: gray;
   }
-
-  &:hover {
-    background-color: $hover;
-  }
-
 }
 </style>
