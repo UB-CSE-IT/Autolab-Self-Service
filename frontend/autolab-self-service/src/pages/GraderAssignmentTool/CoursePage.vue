@@ -16,19 +16,24 @@
 
       <h5>Grading Assignments</h5>
 
-      <RouterLink
-        v-for="assignment in courseLoader.state.data?.grading_assignments"
-        :key="assignment.id"
-        :to="{name: 'grader-assignment-tool-assignment', params: {assignmentId: assignment.id}}"
-      >
-        <GradingAssignmentListElement :grading-assignment="assignment"/>
-      </RouterLink>
-
       <div v-if="courseLoader.state.data?.grading_assignments.length === 0">
         <BannerWithIcon icon="sentiment_dissatisfied">
           <p>No grading assignments have been created yet.</p>
         </BannerWithIcon>
       </div>
+
+      <template v-else>
+        <q-checkbox v-model="showArchived" label="Show archived grading assignments"/>
+        <template v-for="assignment in courseLoader.state.data?.grading_assignments">
+          <RouterLink
+              v-if="!assignment.archived || showArchived"
+              :key="assignment.id"
+              :to="{name: 'grader-assignment-tool-assignment', params: {assignmentId: assignment.id}}"
+          >
+            <GradingAssignmentListElement :grading-assignment="assignment"/>
+          </RouterLink>
+        </template>
+      </template>
     </ApiFetchContentContainer>
 
     <div style="height: 200px;"></div>
@@ -44,9 +49,11 @@ import {GatGradingAssignmentsResponse} from 'src/types/GradingAssignmentToolType
 import {useUserStore} from 'stores/UserStore'
 import GradingAssignmentListElement from 'components/GraderAssignmentTool/GradingAssignmentListElement.vue'
 import BannerWithIcon from 'components/BannerWithIcon.vue'
+import {ref} from 'vue'
 
 const courseName = useRoute().params.courseName
 const userStore = useUserStore()
+const showArchived = ref(false)
 
 const courseLoader = new PortalApiDataLoader<GatGradingAssignmentsResponse>(`/portal/api/gat/course/${courseName}/grading-assignments/`)
 courseLoader.fetch()
