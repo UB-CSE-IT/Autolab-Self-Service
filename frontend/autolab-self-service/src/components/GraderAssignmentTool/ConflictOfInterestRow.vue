@@ -1,25 +1,14 @@
 <template>
   <tr>
-    <td>{{ targetUser.display_name }}<YouBadge v-if="isCurrentUser"/></td>
-    <td>{{ targetUser.email }}</td>
+    <td :class="{'text-red-10': checked}">{{ targetUser.display_name }}
+      <YouBadge v-if="isCurrentUser"/>
+    </td>
+    <td :class="{'text-red-10': checked}">{{ targetUser.email }}</td>
     <td>
-      <q-checkbox v-model="state.conflictOfInterest"
-                  :disable="conflictLoader.state.loading"
-                  style="width: 150px"
-                  @update:modelValue="updateConflictOfInterest($event)">
-        <div>
-          <span v-if="conflictLoader.state.loading"><q-icon name="upload" class="q-mr-sm"/>Saving...</span>
-          <span v-else-if="state.updated">
-          <span v-if="state.success" class="text-green"><q-icon name="done" class="q-mr-sm"/>Saved!</span>
-            <span v-else class="text-red-10">
-              <q-tooltip anchor="top middle" self="center middle">{{ conflictLoader.state.error }}</q-tooltip>
-              <q-icon name="error" class="q-mr-sm"/>
-              Error (hover)
-            </span>
-          </span>
-        </div>
-      </q-checkbox>
-
+      <InstantCheckbox v-model="checked"
+                       :checked-api-data-loader="addConflictLoader"
+                       :unchecked-api-data-loader="removeConflictLoader"
+      />
     </td>
   </tr>
 </template>
@@ -27,10 +16,11 @@
 <script setup lang="ts">
 
 import {GatConflictOfInterestResponse, GatCourse, GatCourseUser} from 'src/types/GradingAssignmentToolTypes'
-import {PropType, reactive} from 'vue'
+import {PropType, ref} from 'vue'
 import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 import {useUserStore} from 'stores/UserStore'
 import YouBadge from 'components/YouBadge.vue'
+import InstantCheckbox from 'components/InstantCheckbox.vue'
 
 const props = defineProps({
   targetUser: {
@@ -53,32 +43,21 @@ const props = defineProps({
   },
 })
 
-const state = reactive({
-  conflictOfInterest: props.initiallyConflictOfInterest,
-  updated: false,
-  success: false,
-})
+const checked = ref(props.initiallyConflictOfInterest)
 
 const userStore = useUserStore()
 const isCurrentUser = userStore.userData.email === props.targetUser.email
 
-const conflictLoader = new PortalApiDataLoader<GatConflictOfInterestResponse>('')
+const addConflictLoader = new PortalApiDataLoader<GatConflictOfInterestResponse>('', 'POST')
+const removeConflictLoader = new PortalApiDataLoader<GatConflictOfInterestResponse>('', 'DELETE')
+
 
 if (props.currentUser?.is_grader) {
-  conflictLoader.endpoint = `/portal/api/gat/course/${props.course.name}/users/${props.currentUser?.email}/conflict-of-interest/${props.targetUser.email}/`
+  addConflictLoader.endpoint = `/portal/api/gat/course/${props.course.name}/users/${props.currentUser?.email}/conflict-of-interest/${props.targetUser.email}/`
+  removeConflictLoader.endpoint = `/portal/api/gat/course/${props.course.name}/users/${props.currentUser?.email}/conflict-of-interest/${props.targetUser.email}/`
 } else {
-  conflictLoader.endpoint = `/portal/api/gat/course/${props.course.name}/users/${props.targetUser?.email}/conflict-of-interest/${props.currentUser.email}/`
+  addConflictLoader.endpoint = `/portal/api/gat/course/${props.course.name}/users/${props.targetUser?.email}/conflict-of-interest/${props.currentUser.email}/`
+  removeConflictLoader.endpoint = `/portal/api/gat/course/${props.course.name}/users/${props.targetUser?.email}/conflict-of-interest/${props.currentUser.email}/`
 }
 
-function updateConflictOfInterest(isConflict: boolean) {
-  conflictLoader.method = isConflict ? 'POST' : 'DELETE'
-  conflictLoader.fetch()
-    .then(() => {
-      state.updated = true
-      state.success = !conflictLoader.state.error
-      if (!state.success) {
-        state.conflictOfInterest = !isConflict
-      }
-    })
-}
 </script>
