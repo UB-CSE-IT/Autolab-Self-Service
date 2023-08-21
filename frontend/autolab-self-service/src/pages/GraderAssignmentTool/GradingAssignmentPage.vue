@@ -24,8 +24,24 @@
           <YouBadge v-if="currentUserEmail === assignment.grader.email"/>
         </h5>
 
-        <p>Assigned {{ assignment.submissions }}</p>
 
+        <q-markup-table>
+          <thead>
+          <tr style="text-align: left">
+            <th>Student Name</th>
+            <th>Student Email</th>
+            <th>Autolab Link</th>
+            <th>Complete</th>
+          </tr>
+          </thead>
+          <tbody>
+          <GradingAssignmentPairRow v-for="pair in assignment.submissions"
+                                    :key="pair.pair_id"
+                                    :pair="pair"
+                                    :assignment="assignmentLoader.state.data?.grading_assignment"
+          />
+          </tbody>
+        </q-markup-table>
 
       </template>
     </ApiFetchContentContainer>
@@ -42,6 +58,7 @@ import {GatGradingAssignmentResponse} from 'src/types/GradingAssignmentToolTypes
 import YouBadge from 'components/YouBadge.vue'
 import {useUserStore} from 'stores/UserStore'
 import GradingAssignmentListElement from 'components/GraderAssignmentTool/GradingAssignmentListElement.vue'
+import GradingAssignmentPairRow from 'components/GraderAssignmentTool/GradingAssignmentPairRow.vue'
 
 const courseName = useRoute().params.courseName
 const assignmentId = useRoute().params.assignmentId
