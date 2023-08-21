@@ -521,7 +521,7 @@ def course_set_grader_hours_view(course_name: str, user_email: str, hours: int):
 
 
 @gat.route("/course/<course_name>/users/<grader_email>/conflict-of-interest/<student_email>/", methods=["POST"])
-@rate_limit_per_user(50, 60)  # 50 requests per minute (users may rapidly add conflicts)
+@rate_limit_per_user(7, 5)  # 7 requests per 5 seconds
 def course_create_conflict_of_interest_view(course_name: str, grader_email: str, student_email: str):
     # Create a conflict of interest between a grader and a student
     course: Course = get_course_by_name_or_404(course_name)
@@ -562,7 +562,7 @@ def course_create_conflict_of_interest_view(course_name: str, grader_email: str,
 
 
 @gat.route("/course/<course_name>/users/<grader_email>/conflict-of-interest/<student_email>/", methods=["DELETE"])
-@rate_limit_per_user(50, 60)  # 50 requests per minute (users may rapidly remove conflicts)
+@rate_limit_per_user(7, 5)  # 7 requests per 5 seconds
 def course_delete_conflict_of_interest_view(course_name: str, grader_email: str, student_email: str):
     # Delete a conflict of interest between a grader and a student
     course: Course = get_course_by_name_or_404(course_name)
@@ -802,7 +802,8 @@ def course_grading_assignment_archive_view(course_name: str, assignment_id: int)
     assignment.archived = target_is_archived
     g.db.commit()
 
-    logger.info(f"{'Archived' if target_is_archived else 'Unarchived'} grading assignment with ID {assignment_id}.")
+    logger.info(f"{'Archived' if target_is_archived else 'Unarchived'} grading assignment with ID {assignment_id} "
+                f"({assignment.assessment_name}).")
 
     return jsonify({
         "success": True,

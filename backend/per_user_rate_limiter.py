@@ -48,6 +48,17 @@ class PerUserRateLimiter:
             return 0.0
         return max(self.seconds - (now - user_queue[0]).total_seconds(), 0.0)
 
+    @staticmethod
+    def human_readable_seconds(seconds: float) -> str:
+        # Returns a human-readable string of the given number of seconds
+
+        if seconds > 10.0:
+            return "{0:.0f} seconds".format(seconds)
+        elif seconds > 1.2:
+            return "{0:.1f} seconds".format(seconds)
+        else:
+            return "a second"
+
 
 # A Flask decorator that limits the number of requests a user can make to a given endpoint
 # Important: It must go UNDER the @app route decorator
@@ -79,10 +90,12 @@ def rate_limit_per_user(times_per_period: int, seconds: float):
                 }), 401
 
             if not limiter.try_use(g.user.username):
+                remaining_time: str = PerUserRateLimiter.human_readable_seconds(
+                    limiter.get_remaining_time(g.user.username))
                 resp = jsonify({
                     "success": False,
-                    "error": "You've exceeded your rate limit. You'll need to wait {0:.2f} seconds before trying"
-                             " that again.".format(limiter.get_remaining_time(g.user.username))
+                    "error": f"You've exceeded your rate limit. You'll need to wait {remaining_time} before trying"
+                             " that again."
                 })
                 return resp, 429
             return func(*args, **kwargs)
