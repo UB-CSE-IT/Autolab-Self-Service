@@ -27,7 +27,7 @@
                 ({{ course.name }})
               </div>
               <div class="actions">
-                <q-btn label="Open" flat />
+                <q-btn label="Open" flat/>
               </div>
             </div>
           </RouterLink>
@@ -36,10 +36,21 @@
 
     </ApiFetchContentContainer>
 
-    <h4 class="q-mb-sm">Import from Autolab</h4>
-    <p>Here are the courses you're enrolled in on Autolab. You can import a course to the portal if you're an instructor
-      or course assistant in it. This data is cached, so it may take a few minutes to update.</p>
     <ApiFetchContentContainer :api-data-loader="autolabCourseLoader" loading-text="Loading your Autolab courses">
+      <template #before-load>
+        <q-btn
+            class="q-mt-xl"
+            v-if="!autolabCourseLoader.state.loaded"
+            label="Import from Autolab"
+            color="primary"
+            @click="autolabCourseLoader.fetch()"
+            icon="download"
+        />
+      </template>
+
+      <h4 class="q-mb-sm">Import from Autolab</h4>
+      <p>Here are the courses you're enrolled in on Autolab. You can import a course to the portal if you're an
+        instructor or course assistant in it. This data is cached, so it may take a few minutes to update.</p>
       <BannerWithIcon icon="info" v-if="autolabCourseLoader.state.data?.courses.length === 0">
         <p>You aren't enrolled in any courses on Autolab.</p>
       </BannerWithIcon>
@@ -68,7 +79,6 @@ const courseLoader = new PortalApiDataLoader<GatCourse[]>('/portal/api/gat/my-co
 courseLoader.fetch()
 
 const autolabCourseLoader = new PortalApiDataLoader<GatAutolabCoursesResponse>('/portal/api/gat/my-autolab-courses/')
-autolabCourseLoader.fetch()
 
 function courseImported(course: GatCourse) {
   courseLoader.state.data?.push(course)

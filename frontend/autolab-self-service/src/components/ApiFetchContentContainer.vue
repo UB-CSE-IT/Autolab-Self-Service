@@ -6,14 +6,15 @@
     <FullWidthError v-else-if="apiDataLoader?.state.error">
       <p>{{ apiDataLoader.state.error }}</p>
     </FullWidthError>
-    <slot v-else/>
+    <slot v-else-if="apiDataLoader?.state.loaded"/>
+    <slot v-else name="before-load"/>
   </div>
 </template>
 
 <script setup lang="ts">
-import {PortalApiDataLoader} from "src/utilities/PortalApiDataLoader"
-import FullWidthLoading from "components/FullWidthLoading.vue"
-import FullWidthError from "components/FullWidthError.vue"
+import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
+import FullWidthLoading from 'components/FullWidthLoading.vue'
+import FullWidthError from 'components/FullWidthError.vue'
 
 defineProps({
   apiDataLoader: {
@@ -21,8 +22,8 @@ defineProps({
   },
   loadingText: {
     type: String,
-    default: "Loading...",
-  }
+    default: 'Loading...',
+  },
 })
 
 </script>
