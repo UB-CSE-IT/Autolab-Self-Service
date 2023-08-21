@@ -1,9 +1,12 @@
 <template>
   <q-checkbox v-model="state.checked"
               :disable="state.mostRecentApiDataLoader?.state.loading"
-              style="width: 150px"
+              style="min-width: 150px"
               @update:modelValue="checkStateChanged">
-    <div>
+    <div class="row">
+      <div v-if="slots.default" class="q-mr-md">
+        <slot/>
+      </div>
       <span v-if="state.mostRecentApiDataLoader?.state.loading"><q-icon name="upload" class="q-mr-sm"/>Saving...</span>
       <span v-else-if="state.updated">
         <span v-if="state.success" class="text-green"><q-icon name="done" class="q-mr-sm"/>Saved!</span>
@@ -21,7 +24,7 @@
 
 <script setup lang="ts">
 
-import {PropType, reactive} from 'vue'
+import {PropType, reactive, useSlots} from 'vue'
 import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 
 const emits = defineEmits(['updated', 'error', 'loading', 'update:modelValue'])
@@ -54,6 +57,8 @@ const state = reactive({
   success: false,
   mostRecentApiDataLoader: props.modelValue ? props.checkedApiDataLoader : props.uncheckedApiDataLoader as PortalApiDataLoader<any>,
 })
+
+const slots = useSlots()
 
 function checkStateChanged() {
   if (state.checked) {

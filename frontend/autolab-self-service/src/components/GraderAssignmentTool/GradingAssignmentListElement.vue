@@ -1,29 +1,44 @@
 <template>
-  <div class="element"
-       :class="{archived: gradingAssignment.archived, detail: detail}"
+  <div class="element row"
+       :class="{archived: archived, detail: detail}"
   >
-    <q-badge rounded color="primary" label="Archived" v-if="gradingAssignment.archived"/>
+    <div class="left col-grow">
+      <q-badge rounded color="primary" label="Archived" v-if="archived"/>
 
-    <p class="text-h5">
-      {{ props.gradingAssignment.assessment_display_name }}
-      <span class="text-h6 text-grey-8">({{ props.gradingAssignment.assessment_name }})</span>
-    </p>
-    <p>Created by {{ props.gradingAssignment.created_by_display_name }}
-      <span v-if="detail"> ({{ props.gradingAssignment.created_by_email }}) </span>
-      on {{ isoDateToLocaleString(props.gradingAssignment.created_at) }}
-    </p>
-    <template v-if="detail">
-      <p>Assignment ID: {{ props.gradingAssignment.id }}</p>
-    </template>
+      <p class="text-h5">
+        {{ props.gradingAssignment.assessment_display_name }}
+        <span class="text-h6 text-grey-8">({{ props.gradingAssignment.assessment_name }})</span>
+      </p>
+      <p>Created by {{ props.gradingAssignment.created_by_display_name }}
+        <span v-if="detail"> ({{ props.gradingAssignment.created_by_email }}) </span>
+        on {{ isoDateToLocaleString(props.gradingAssignment.created_at) }}
+      </p>
+      <template v-if="detail">
+        <p>Assignment ID: {{ props.gradingAssignment.id }}</p>
+      </template>
+    </div>
+    <div class="right col-shrink">
+      <template v-if="props.showArchiveCheckbox">
+        <InstantCheckbox
+            v-model="archived"
+            :checked-api-data-loader="archiveLoader"
+            :unchecked-api-data-loader="unarchiveLoader"
+        >
+          Archive
+        </InstantCheckbox>
+      </template>
+    </div>
   </div>
 </template>
 
 
 <script setup lang="ts">
 
-import {PropType} from 'vue'
+import {PropType, ref} from 'vue'
 import {GatGradingAssignment} from 'src/types/GradingAssignmentToolTypes'
 import {isoDateToLocaleString} from 'src/utilities/DataFormatter'
+import InstantCheckbox from 'components/InstantCheckbox.vue'
+import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 
 const props = defineProps({
   gradingAssignment: {
@@ -35,8 +50,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showArchiveCheckbox: {
+    type: Boolean,
+    default: false,
+  },
 })
 
+const archiveLoader = new PortalApiDataLoader(`/portal/api/gat/course/${props.gradingAssignment?.course.name}/grading-assignments/${props.gradingAssignment.id}/archive/`, 'POST')
+const unarchiveLoader = new PortalApiDataLoader(`/portal/api/gat/course/${props.gradingAssignment?.course.name}/grading-assignments/${props.gradingAssignment.id}/archive/`, 'DELETE')
+const archived = ref(props.gradingAssignment.archived)
 
 </script>
 
@@ -60,6 +82,10 @@ const props = defineProps({
 
   &:hover:not(.detail) {
     background-color: $hover;
+  }
+
+  .right {
+    min-width: 220px;
   }
 
 }

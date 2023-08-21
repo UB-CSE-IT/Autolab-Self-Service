@@ -13,6 +13,7 @@
           v-if="assignmentLoader.state.data?.grading_assignment"
           :grading-assignment="assignmentLoader.state.data.grading_assignment"
           :detail="true"
+          :show-archive-checkbox="true"
       />
 
       <template
