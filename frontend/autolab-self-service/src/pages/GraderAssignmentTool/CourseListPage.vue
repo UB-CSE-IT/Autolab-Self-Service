@@ -10,10 +10,10 @@
     <p>Here are the courses that have already been imported from Autolab. You can only view courses where you're an
       instructor or course assistant.</p>
     <ApiFetchContentContainer :api-data-loader="courseLoader" loading-text="Loading your courses">
-      <BannerWithIcon icon="info" v-if="courseLoader.state.data?.length === 0">
+      <InfoBox v-if="courseLoader.state.data?.length === 0">
         <p>You don't belong to any courses using the Grader Assignment Tool. You may be able to import one from Autolab
           below.</p>
-      </BannerWithIcon>
+      </InfoBox>
 
 
       <div class="flex" v-else>
@@ -51,9 +51,9 @@
       <h4 class="q-mb-sm">Import from Autolab</h4>
       <p>Here are the courses you're enrolled in on Autolab. You can import a course to the portal if you're an
         instructor or course assistant in it. This data is cached, so it may take a few minutes to update.</p>
-      <BannerWithIcon icon="info" v-if="autolabCourseLoader.state.data?.courses.length === 0">
+      <InfoBox v-if="autolabCourseLoader.state.data?.courses.length === 0">
         <p>You aren't enrolled in any courses on Autolab.</p>
-      </BannerWithIcon>
+      </InfoBox>
       <div
           class="q-mb-md"
           v-else
@@ -72,8 +72,8 @@
 import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 import ApiFetchContentContainer from 'components/ApiFetchContentContainer.vue'
 import {GatAutolabCoursesResponse, GatCourse} from 'src/types/GradingAssignmentToolTypes'
-import BannerWithIcon from 'components/BannerWithIcon.vue'
 import AutolabCourseListElement from 'components/GraderAssignmentTool/AutolabCourseListElement.vue'
+import InfoBox from 'components/Boxes/InfoBox.vue'
 
 const courseLoader = new PortalApiDataLoader<GatCourse[]>('/portal/api/gat/my-courses/')
 courseLoader.fetch()

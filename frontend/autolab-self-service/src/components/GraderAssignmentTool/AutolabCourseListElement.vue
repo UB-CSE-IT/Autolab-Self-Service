@@ -11,15 +11,15 @@
       :loading="autolabCourseImporter.state.loading"
     />
 
-    <BannerWithIcon class="q-my-lg" theme="error" icon="error" v-if="autolabCourseImporter.state.error">
+    <ErrorBox v-if="autolabCourseImporter.state.error">
       <p>{{ autolabCourseImporter.state.error }}</p>
-    </BannerWithIcon>
-    <BannerWithIcon class="q-my-lg" theme="success" icon="done" v-if="autolabCourseImporter.state.data">
+    </ErrorBox>
+    <SuccessBox v-if="autolabCourseImporter.state.data">
       <p>Successfully imported course from Autolab!</p>
       <RouterLink :to="{name: 'grader-assignment-tool-course', params: {courseName: course.name}}">
         <q-btn class="q-mt-sm" label="Go to course" color="primary" icon-right="arrow_forward"/>
       </RouterLink>
-    </BannerWithIcon>
+    </SuccessBox>
   </div>
 </template>
 
@@ -28,7 +28,8 @@
 import {GatAutolabCourse, GatCourse} from "src/types/GradingAssignmentToolTypes";
 import {PropType} from "vue";
 import {PortalApiDataLoader} from "src/utilities/PortalApiDataLoader";
-import BannerWithIcon from "components/BannerWithIcon.vue";
+import ErrorBox from 'components/Boxes/ErrorBox.vue'
+import SuccessBox from 'components/Boxes/SuccessBox.vue'
 
 const props = defineProps({
   course: {

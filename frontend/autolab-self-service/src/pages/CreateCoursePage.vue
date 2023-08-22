@@ -9,14 +9,14 @@
           details before the course is actually created. If you don't see the course you'd
           like, <a target="_blank" href="https://autolab.cse.buffalo.edu/contact">contact us</a> to create a
           custom one.</p>
-        <div v-if="userStore.userData.isAdmin" class="admin-info">
+        <AdminBox>
           <p>As an admin, you can create courses for any instructor.</p>
           <q-form @submit="loadCourses">
             <q-input v-model="state.username" label="Instructor username">
               <q-btn icon="east" color="primary" type="submit"/>
             </q-input>
           </q-form>
-        </div>
+        </AdminBox>
         <div v-if="state.loadingCourses" class="column content-center">
           <q-spinner-hourglass color="primary" size="100px"/>
           <p>Loading courses...</p>
@@ -224,6 +224,7 @@ import {useUserStore} from 'stores/UserStore';
 import {MyCoursesResponse} from "src/types/MyCoursesResponse";
 import {Course} from "src/types/Course";
 import {useRouter} from "vue-router";
+import AdminBox from 'components/Boxes/AdminBox.vue'
 
 const userStore = useUserStore()
 const router = useRouter()

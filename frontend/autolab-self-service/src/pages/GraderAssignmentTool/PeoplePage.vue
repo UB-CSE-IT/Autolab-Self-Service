@@ -14,12 +14,12 @@
                color="primary"
         />
       </div>
-      <BannerWithIcon v-if="syncRosterLoader.state.error" icon="error" theme="error">
+      <ErrorBox v-if="syncRosterLoader.state.error">
         {{ syncRosterLoader.state.error }}
-      </BannerWithIcon>
-      <BannerWithIcon v-else-if="syncRosterLoader.state.loaded" icon="done" theme="success">
+      </ErrorBox>
+      <SuccessBox v-else-if="syncRosterLoader.state.loaded">
         Roster synced successfully.
-      </BannerWithIcon>
+      </SuccessBox>
 
       <h5>Graders</h5>
       <q-markup-table>
@@ -71,8 +71,9 @@ import {useRoute} from 'vue-router'
 import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 import ApiFetchContentContainer from 'components/ApiFetchContentContainer.vue'
 import {GatCourseUsersResponse} from 'src/types/GradingAssignmentToolTypes'
-import BannerWithIcon from 'components/BannerWithIcon.vue'
 import PersonRow from 'components/GraderAssignmentTool/PersonRow.vue'
+import ErrorBox from 'components/Boxes/ErrorBox.vue'
+import SuccessBox from 'components/Boxes/SuccessBox.vue'
 
 const courseName = useRoute().params.courseName
 

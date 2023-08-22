@@ -10,9 +10,9 @@
       <h5 class="q-mb-sm">Create a New Grading Assignment</h5>
       <p>Choose an assessment from Autolab to generate a grading assignment based on the current roster.</p>
 
-      <BannerWithIcon v-if="assessmentsLoader.state.data?.assessments.length === 0" icon="info">
+      <InfoBox v-if="assessmentsLoader.state.data?.assessments.length === 0">
         This course doesn't have any Autolab assessments yet.
-      </BannerWithIcon>
+      </InfoBox>
 
       <q-markup-table v-else>
         <thead>
@@ -45,7 +45,7 @@ import {useRoute} from 'vue-router'
 import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 import {GatAutolabAssessmentsResponse} from 'src/types/GradingAssignmentToolTypes'
 import ApiFetchContentContainer from 'components/ApiFetchContentContainer.vue'
-import BannerWithIcon from 'components/BannerWithIcon.vue'
+import InfoBox from 'components/Boxes/InfoBox.vue'
 
 const courseName = useRoute().params.courseName
 
