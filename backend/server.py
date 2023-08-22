@@ -233,7 +233,7 @@ def my_courses(username: str):
     if g.user.username != username and not g.user.is_admin:
         return jsonify({
             "success": False,
-            "error": "You only authorized to view your own courses."
+            "error": "You are only authorized to view your own courses."
         }), 403
     professors = app.course_store.get_professors()
     logger.debug(f"Found {len(professors)} professors")
