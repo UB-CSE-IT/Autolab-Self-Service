@@ -41,8 +41,8 @@ defineProps({
 
   &.default {
     // Default is useful for general information messages
-    border: 1px solid $primary;
     background-color: #e3f2fd;
+    border: 1px solid $primary;
 
     > .icon {
       color: $primary;
@@ -69,10 +69,10 @@ defineProps({
 
   &.success {
     background-color: #e8f5e9;
-    border: 1px solid #1b5e20;
+    border: 1px solid $positive;
 
     > .icon {
-      color: #1b5e20;
+      color: $positive;
     }
   }
 
