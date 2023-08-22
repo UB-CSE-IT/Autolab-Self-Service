@@ -1,7 +1,7 @@
 <template>
   <div class="row no-wrap container theme" :class="theme">
     <q-icon v-if="icon !== ''" class="q-mr-lg icon" :name="icon" :size="iconSize"/>
-    <div class="items-center slot-wrapper">
+    <div class="items-center slot-wrapper" style="width: 100%">
       <slot/>
     </div>
   </div>
@@ -36,6 +36,7 @@ defineProps({
 .theme {
   border-radius: 4px;
   padding: 16px;
+  margin: 16px 0;
   color: black;
 
   &.default {
@@ -57,12 +58,43 @@ defineProps({
     }
   }
 
+  &.warning {
+    background-color: #fff3e0;
+    border: 1px solid $warning;
+
+    > .icon {
+      color: $warning;
+    }
+  }
+
   &.success {
     background-color: #e8f5e9;
     border: 1px solid #1b5e20;
 
     > .icon {
       color: #1b5e20;
+    }
+  }
+
+  &.debug {
+    background-color: $developer-bg;
+    border-left: 6px solid $developer;
+    border-right: 6px solid $developer;
+    border-radius: 16px;
+
+    > .icon {
+      color: $developer;
+    }
+  }
+
+  &.admin {
+    background-color: $admin-bg;
+    border-left: 6px solid $admin;
+    border-right: 6px solid $admin;
+    border-radius: 16px;
+
+    > .icon {
+      color: $admin;
     }
   }
 

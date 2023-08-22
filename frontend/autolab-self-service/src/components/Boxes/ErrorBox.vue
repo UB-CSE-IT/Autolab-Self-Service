@@ -1,0 +1,9 @@
+<template>
+  <BannerWithIcon icon="error" theme="error">
+    <slot/>
+  </BannerWithIcon>
+</template>
+
+<script setup lang="ts">
+import BannerWithIcon from 'components/BannerWithIcon.vue'
+</script>
