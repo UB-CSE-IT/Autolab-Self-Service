@@ -14,7 +14,7 @@
                :to="{name: 'grader-assignment-tool-person', params: {user: userStore.userData.email}}"/>
       </div>
 
-      <h5>Grading Assignments</h5>
+      <h5 class="q-mb-sm">Grading Assignments</h5>
 
       <div v-if="courseLoader.state.data?.grading_assignments.length === 0">
         <BannerWithIcon icon="sentiment_dissatisfied">
@@ -23,8 +23,21 @@
       </div>
 
       <template v-else>
-        <q-checkbox v-model="showArchived" label="Show archived grading assignments"/>
-        <template v-for="assignment in courseLoader.state.data?.grading_assignments">
+        <p>Showing {{ shownAssignments.length }} of {{ allAssignments.length }} assignments</p>
+
+        <q-checkbox
+            v-model="showArchived"
+            label="Show archived grading assignments"
+            class="q-mb-lg"
+        />
+
+        <div v-if="shownAssignments.length === 0" class="q-mt-sm">
+          <BannerWithIcon icon="archive">
+            <p>All grading assignments have been archived.</p>
+          </BannerWithIcon>
+        </div>
+
+        <template v-for="assignment in shownAssignments">
           <RouterLink
               v-if="!assignment.archived || showArchived"
               :key="assignment.id"
@@ -45,15 +58,23 @@
 import {useRoute} from 'vue-router'
 import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 import ApiFetchContentContainer from 'components/ApiFetchContentContainer.vue'
-import {GatGradingAssignmentsResponse} from 'src/types/GradingAssignmentToolTypes'
+import {GatGradingAssignment, GatGradingAssignmentsResponse} from 'src/types/GradingAssignmentToolTypes'
 import {useUserStore} from 'stores/UserStore'
 import GradingAssignmentListElement from 'components/GraderAssignmentTool/GradingAssignmentListElement.vue'
 import BannerWithIcon from 'components/BannerWithIcon.vue'
-import {ref} from 'vue'
+import {computed, ref} from 'vue'
 
 const courseName = useRoute().params.courseName
 const userStore = useUserStore()
 const showArchived = ref(false)
+const shownAssignments = computed(() => {
+  return courseLoader.state.data?.grading_assignments.filter((assignment: GatGradingAssignment) => {
+    return !assignment.archived || showArchived.value
+  })
+})
+const allAssignments = computed(() => {
+  return courseLoader.state.data?.grading_assignments ?? []
+})
 
 const courseLoader = new PortalApiDataLoader<GatGradingAssignmentsResponse>(`/portal/api/gat/course/${courseName}/grading-assignments/`)
 courseLoader.fetch()
