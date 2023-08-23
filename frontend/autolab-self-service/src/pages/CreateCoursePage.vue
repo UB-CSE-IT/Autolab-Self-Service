@@ -219,7 +219,7 @@
 </template>
 
 <script setup lang="ts">
-import {reactive, ref} from 'vue';
+import {reactive} from 'vue';
 import {useUserStore} from 'stores/UserStore';
 import {MyCoursesResponse} from "src/types/MyCoursesResponse";
 import {Course} from "src/types/Course";

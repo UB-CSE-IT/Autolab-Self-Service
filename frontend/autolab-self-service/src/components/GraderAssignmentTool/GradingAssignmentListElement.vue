@@ -1,5 +1,5 @@
 <template>
-  <div class="element row"
+  <div class="element row transition-colors"
        :class="{archived: archived, detail: detail}"
   >
     <div class="left col-grow">
