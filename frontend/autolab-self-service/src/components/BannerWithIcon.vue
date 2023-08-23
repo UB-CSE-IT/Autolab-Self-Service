@@ -11,15 +11,15 @@
 defineProps({
   icon: {
     type: String,
-    default: "",
+    default: '',
   },
   iconSize: {
     type: String,
-    default: "50px",
+    default: '50px',
   },
   theme: {
     type: String,
-    default: "default",
+    default: 'default',
   },
 })
 </script>

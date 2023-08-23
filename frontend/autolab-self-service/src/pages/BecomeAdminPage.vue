@@ -44,12 +44,10 @@
 </template>
 
 <script setup lang="ts">
-import {reactive} from 'vue';
-import {useUserStore} from 'stores/UserStore';
-import {useRouter} from "vue-router";
+import {reactive} from 'vue'
+import {useUserStore} from 'stores/UserStore'
 
 const userStore = useUserStore()
-const router = useRouter()
 
 const state = reactive({
   loading: false,
@@ -63,23 +61,23 @@ function syncAdminStatus() {
   fetch('/portal/api/admin-update/', {
     method: 'POST',
   }).then(resp => resp.json())
-    .then(data => {
-      if (data.success) {
-        state.error = false
-        state.success = true
-        state.message = data.message
-        if (data.isAdmin !== undefined) {
-          userStore.userData.isAdmin = data.isAdmin
+      .then(data => {
+        if (data.success) {
+          state.error = false
+          state.success = true
+          state.message = data.message
+          if (data.isAdmin !== undefined) {
+            userStore.userData.isAdmin = data.isAdmin
+          }
+        } else {
+          state.error = true
+          state.success = false
+          state.message = data.error
         }
-      } else {
-        state.error = true
-        state.success = false
-        state.message = data.error
-      }
-    })
-    .finally(() => {
-      state.loading = false
-    })
+      })
+      .finally(() => {
+        state.loading = false
+      })
 }
 
 

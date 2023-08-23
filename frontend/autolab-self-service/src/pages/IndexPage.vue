@@ -62,11 +62,8 @@
 </template>
 
 <script setup lang="ts">
-import {useUserStore} from 'stores/UserStore';
-import {useRouter} from "vue-router";
+import {useUserStore} from 'stores/UserStore'
 
 const userStore = useUserStore()
-
-const router = useRouter()
 
 </script>

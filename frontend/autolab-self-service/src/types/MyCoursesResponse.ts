@@ -1,4 +1,4 @@
-import {Course} from "src/types/Course";
+import {Course} from 'src/types/Course'
 
 interface Courses {
   username: string

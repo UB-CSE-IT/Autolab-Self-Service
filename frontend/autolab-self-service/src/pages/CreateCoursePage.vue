@@ -203,12 +203,12 @@
                      color="primary"/>
             </div>
           </div>
-<!--          <q-expansion-item-->
-<!--            class="q-ma-xl"-->
-<!--            icon="info"-->
-<!--            label="More information">-->
-<!--            <p>Server response: {{ state.stage3.response }}</p>-->
-<!--          </q-expansion-item>-->
+          <!--          <q-expansion-item-->
+          <!--            class="q-ma-xl"-->
+          <!--            icon="info"-->
+          <!--            label="More information">-->
+          <!--            <p>Server response: {{ state.stage3.response }}</p>-->
+          <!--          </q-expansion-item>-->
         </div>
       </div>
     </div>
@@ -219,15 +219,13 @@
 </template>
 
 <script setup lang="ts">
-import {reactive} from 'vue';
-import {useUserStore} from 'stores/UserStore';
-import {MyCoursesResponse} from "src/types/MyCoursesResponse";
-import {Course} from "src/types/Course";
-import {useRouter} from "vue-router";
+import {reactive} from 'vue'
+import {useUserStore} from 'stores/UserStore'
+import {MyCoursesResponse} from 'src/types/MyCoursesResponse'
+import {Course} from 'src/types/Course'
 import AdminBox from 'components/Boxes/AdminBox.vue'
 
 const userStore = useUserStore()
-const router = useRouter()
 
 // Stage 0 is picking the course, 1 is choosing the name, 2 is the final confirmation, 3 is after confirmation
 
@@ -266,56 +264,56 @@ function loadCourses() {
   state.errorLoadingCourses = false
   state.errorMessage = ''
   fetch(`/portal/api/my-courses/${state.username}/`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        state.data = data;
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          state.data = data
+          state.loadingCourses = false
+        } else {
+          return Promise.reject(data)
+        }
+      })
+      .catch(error => {
+        state.errorLoadingCourses = true
         state.loadingCourses = false
-      } else {
-        return Promise.reject(data)
-      }
-    })
-    .catch(error => {
-      state.errorLoadingCourses = true
-      state.loadingCourses = false
-      state.errorMessage = error.error
-    })
+        state.errorMessage = error.error
+      })
 }
 
 const sampleAssignmentNames = [
-  "Bug2",
-  "Genetic Algorithm",
-  "Physics Engine",
-  "Microwave",
-  "Calculator",
-  "Rhyming Dictionary",
-  "Maze Solver",
-  "Decision Tree",
-  "Clicker Game",
-  "Lab 2 - Part C",
-  "Lab Exam 4 - Part A",
-  "Project - Part 2",
-  "Lecture Question 6 - Reference Batteries",
-  "Lecture Question 2 - Polymorphic Electronics",
-  "Lecture Question 5 - Graph Connections",
-  "Lecture Question 3 - Traffic Actors",
-  "Final Exam",
-  "Run-Length Decoder",
-  "Conway's Game of Life",
-  "Priority Queue",
-  "Instant Messenger",
-  "Dynamic Allocator",
-  "Synchronization: Semaphores and Producer-Consumer Queues",
-  "Structured Matrix Vector Multiplication",
-  "Perfect Matching",
-  "Closest Pair of Points",
-  "RAFT Consensus",
-  "HTTP and Docker",
-  "Dynamic Site",
-  "Live Chat",
-  "Authentication",
-  "Report Checkpoint",
-  "Presentation"
+  'Bug2',
+  'Genetic Algorithm',
+  'Physics Engine',
+  'Microwave',
+  'Calculator',
+  'Rhyming Dictionary',
+  'Maze Solver',
+  'Decision Tree',
+  'Clicker Game',
+  'Lab 2 - Part C',
+  'Lab Exam 4 - Part A',
+  'Project - Part 2',
+  'Lecture Question 6 - Reference Batteries',
+  'Lecture Question 2 - Polymorphic Electronics',
+  'Lecture Question 5 - Graph Connections',
+  'Lecture Question 3 - Traffic Actors',
+  'Final Exam',
+  'Run-Length Decoder',
+  'Conway\'s Game of Life',
+  'Priority Queue',
+  'Instant Messenger',
+  'Dynamic Allocator',
+  'Synchronization: Semaphores and Producer-Consumer Queues',
+  'Structured Matrix Vector Multiplication',
+  'Perfect Matching',
+  'Closest Pair of Points',
+  'RAFT Consensus',
+  'HTTP and Docker',
+  'Dynamic Site',
+  'Live Chat',
+  'Authentication',
+  'Report Checkpoint',
+  'Presentation',
 ]
 
 function getRandomSampleAssignments(): string[] {
@@ -357,7 +355,7 @@ function moveToStage1(course: Course) {
     // Only update the display name if moving forwards, keep their custom option if they go back
     state.stage1.typedDisplayName = course.suggestedName
   }
-  state.stage0.selectedCourse = course;
+  state.stage0.selectedCourse = course
   state.stage2.displayName = ''
   state.stage = 1
 }
@@ -388,28 +386,28 @@ function requestCreateCourse() {
   fetch('/portal/api/create-course/', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        state.stage3.success = true
-        state.stage3.response = data.data
-      } else {
-        return Promise.reject(data)
-      }
-    })
-    .catch(error => {
-      state.stage3.error = true
-      state.stage3.errorMessage = error.error
-    })
-    .finally(
-      () => {
-        state.stage3.loading = false
-      }
-    )
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          state.stage3.success = true
+          state.stage3.response = data.data
+        } else {
+          return Promise.reject(data)
+        }
+      })
+      .catch(error => {
+        state.stage3.error = true
+        state.stage3.errorMessage = error.error
+      })
+      .finally(
+          () => {
+            state.stage3.loading = false
+          },
+      )
 }
 
 loadCourses()

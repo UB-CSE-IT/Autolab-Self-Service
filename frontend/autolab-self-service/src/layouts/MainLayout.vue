@@ -8,7 +8,7 @@
             <q-avatar>
               <img src="/portal/icons/autolab.svg" alt="Autolab Logo">
             </q-avatar>
-            Autolab Self-Service Portal{{userStore.developerMode ? ' (Developer Mode)' : ''}}
+            Autolab Self-Service Portal{{ userStore.developerMode ? ' (Developer Mode)' : '' }}
           </q-toolbar-title>
         </q-btn>
       </q-toolbar>
@@ -22,10 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import {useUserStore} from 'stores/UserStore';
+import {useUserStore} from 'stores/UserStore'
 import 'src/css/portal.scss'
-import {computed} from "vue";
-import LoginPanel from "layouts/LoginPanel.vue";
+import {computed} from 'vue'
+import LoginPanel from 'layouts/LoginPanel.vue'
 
 const userStore = useUserStore()
 

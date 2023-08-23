@@ -1,5 +1,5 @@
-import {defineStore} from 'pinia';
-import {UserData} from "src/types/UserData";
+import {defineStore} from 'pinia'
+import {UserData} from 'src/types/UserData'
 
 export const useUserStore = defineStore('user-store', {
   state: () => {
@@ -7,7 +7,7 @@ export const useUserStore = defineStore('user-store', {
       loggedIn: false,
       userData: {} as UserData,
       userDataLoading: false,
-      developerMode: false
+      developerMode: false,
     }
   },
   actions: {
@@ -30,7 +30,7 @@ export const useUserStore = defineStore('user-store', {
         .finally(() => {
           this.userDataLoading = false
         })
-    }
+    },
   },
-  getters: {}
+  getters: {},
 })

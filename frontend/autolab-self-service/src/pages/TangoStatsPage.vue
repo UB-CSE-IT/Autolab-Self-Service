@@ -61,9 +61,9 @@
 </template>
 
 <script setup lang="ts">
-import {reactive} from 'vue';
-import {TangoHistogramPoint} from "src/types/TangoHistogramPoint";
-import FullWidthLoading from "components/FullWidthLoading.vue";
+import {reactive} from 'vue'
+import {TangoHistogramPoint} from 'src/types/TangoHistogramPoint'
+import FullWidthLoading from 'components/FullWidthLoading.vue'
 
 
 const state = reactive({
@@ -78,19 +78,19 @@ const state = reactive({
 function updateTangoStats() {
   state.loading = true
   fetch('/portal/api/tango-stats/', {}).then(resp => resp.json())
-    .then(data => {
-      if (data.success) {
-        state.error = false
-        state.success = true
-        state.data = data.data
-      } else {
-        state.error = true
-        state.message = data.error
-      }
-    })
-    .finally(() => {
-      state.loading = false
-    })
+      .then(data => {
+        if (data.success) {
+          state.error = false
+          state.success = true
+          state.data = data.data
+        } else {
+          state.error = true
+          state.message = data.error
+        }
+      })
+      .finally(() => {
+        state.loading = false
+      })
 }
 
 updateTangoStats()

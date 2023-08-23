@@ -1,4 +1,4 @@
-import {reactive} from "vue"
+import {reactive} from 'vue'
 
 interface PortalApiDataLoaderState<T> {
   loading: boolean

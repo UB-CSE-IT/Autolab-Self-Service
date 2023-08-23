@@ -3,12 +3,12 @@
     <p class="text-h5">{{ course.display_name }} ({{ course.semester }})</p>
     <p class="text-h6 subtext">({{ course.name }}, {{ course.role }})</p>
     <q-btn
-      @click="importFromAutolab"
-      label="Import from Autolab"
-      color="primary"
-      class="q-mt-sm"
-      icon="download"
-      :loading="autolabCourseImporter.state.loading"
+        @click="importFromAutolab"
+        label="Import from Autolab"
+        color="primary"
+        class="q-mt-sm"
+        icon="download"
+        :loading="autolabCourseImporter.state.loading"
     />
 
     <ErrorBox v-if="autolabCourseImporter.state.error">
@@ -25,17 +25,17 @@
 
 
 <script setup lang="ts">
-import {GatAutolabCourse, GatCourse} from "src/types/GradingAssignmentToolTypes";
-import {PropType} from "vue";
-import {PortalApiDataLoader} from "src/utilities/PortalApiDataLoader";
+import {GatAutolabCourse, GatCourse} from 'src/types/GradingAssignmentToolTypes'
+import {PropType} from 'vue'
+import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 import ErrorBox from 'components/Boxes/ErrorBox.vue'
 import SuccessBox from 'components/Boxes/SuccessBox.vue'
 
 const props = defineProps({
   course: {
     type: Object as PropType<GatAutolabCourse>,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const emits = defineEmits(['courseImported'])
@@ -44,13 +44,13 @@ const autolabCourseImporter = new PortalApiDataLoader(`/portal/api/gat/create-co
 
 function importFromAutolab() {
   autolabCourseImporter.fetch()
-    .then(() => {
-      if (autolabCourseImporter.state.error === undefined) {
-        const course = {...props.course} as GatCourse
-        course.display_name += ` (${props.course?.semester})`
-        emits('courseImported', course)
-      }
-    })
+      .then(() => {
+        if (autolabCourseImporter.state.error === undefined) {
+          const course = {...props.course} as GatCourse
+          course.display_name += ` (${props.course?.semester})`
+          emits('courseImported', course)
+        }
+      })
 }
 
 </script>

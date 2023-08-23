@@ -49,11 +49,6 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/GraderAssignmentTool/PersonPage.vue'),
           },
           {
-            path: ':courseName/assignments',
-            name: 'grader-assignment-tool-assignments',
-            component: () => import('pages/GraderAssignmentTool/GradingAssignmentsListPage.vue'),
-          },
-          {
             path: ':courseName/assignments/new',
             name: 'grader-assignment-tool-autolab-assessments',
             component: () => import('pages/GraderAssignmentTool/AutolabAssessmentsPage.vue'),
