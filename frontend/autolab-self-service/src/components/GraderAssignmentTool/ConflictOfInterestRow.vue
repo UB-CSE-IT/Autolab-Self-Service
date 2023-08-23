@@ -1,9 +1,9 @@
 <template>
   <tr>
-    <td :class="{'text-red-10': checked}">{{ targetUser.display_name }}
+    <td :class="{'text-red-10': checked}" class="transition-colors">{{ targetUser.display_name }}
       <YouBadge v-if="isCurrentUser"/>
     </td>
-    <td :class="{'text-red-10': checked}">{{ targetUser.email }}</td>
+    <td :class="{'text-red-10': checked}" class="transition-colors">{{ targetUser.email }}</td>
     <td>
       <InstantCheckbox v-model="checked"
                        :checked-api-data-loader="addConflictLoader"
