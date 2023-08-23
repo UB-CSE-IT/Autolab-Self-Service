@@ -1,5 +1,5 @@
 <template>
-  <span class="you-badge"><slot>You</slot></span>
+  <span class="you-badge q-ml-sm"><slot>You</slot></span>
 </template>
 
 <style scoped lang="scss">
@@ -10,6 +10,5 @@
   color: white;
   padding: 2px 6px;
   border-radius: 4px;
-  margin-left: 12px;
 }
 </style>

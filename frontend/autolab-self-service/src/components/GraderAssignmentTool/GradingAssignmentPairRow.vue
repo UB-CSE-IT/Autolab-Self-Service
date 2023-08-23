@@ -1,5 +1,5 @@
 <template>
-  <tr :class="{'complete': complete}">
+  <tr :class="{'complete': complete}" class="transition-colors">
     <td>{{ pair.student_display_name }}</td>
     <td>{{ pair.student_email }}</td>
     <td>
@@ -12,6 +12,7 @@
           v-model="complete"
           :checked-api-data-loader="completeLoader"
           :unchecked-api-data-loader="incompleteLoader"
+          @update:modelValue="completeUpdated(complete)"
       />
     </td>
   </tr>
@@ -34,7 +35,13 @@ const props = defineProps({
   },
 })
 
+const emits = defineEmits(['completeUpdated'])
+
 const complete = ref(props.pair?.completed ?? false)
+
+function completeUpdated(complete: boolean) {
+  emits('completeUpdated', complete)
+}
 
 const completeLoader = new PortalApiDataLoader(`/portal/api/gat/course/${props.assignment?.course.name}/
 grading-assignments/${props.assignment?.id}/pairs/${props.pair?.pair_id}/complete/`, 'POST')
