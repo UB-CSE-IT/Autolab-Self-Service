@@ -95,7 +95,8 @@ def internal_server_error(e):
 
 @app.errorhandler(400)
 def bad_request_error(e):
-    message = str(e) if e else "400: Bad request"
+    message = str(e.description) if e else "400: Bad request"
+    # Only return the custom message for 400 since it's used in generic ways. Saying "Bad Request" is confusing
     return jsonify({
         "success": False,
         "error": message

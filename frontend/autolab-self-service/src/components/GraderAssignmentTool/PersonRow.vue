@@ -81,23 +81,23 @@ const state = reactive({
 const hoursLoader = new PortalApiDataLoader<GatCourseUser>('', 'POST')
 
 function updateHours() {
-  if (isNaN(+hours.value)) {
-    // Don't submit if the value is not a number
+  if (hours.value == '') {
+    // Don't submit if the value is empty
     return
   }
   hoursLoader.endpoint = `/portal/api/gat/course/${courseName}/users/${props.user.email}/set-grader-hours/${hours.value}/`
   hoursLoader.fetch()
-    .then(() => {
-      if (!hoursLoader.state.error) {
-        // If the hours were successfully updated, update the serverHours value
-        serverHours.value = hoursLoader.state.data?.grading_hours ?? 0
-        state.updatedHoursSuccessfully = true
-        state.updatedHoursError = null
-      } else {
-        state.updatedHoursSuccessfully = false
-        state.updatedHoursError = `Failed to update hours to ${hours.value}: ${hoursLoader.state.error}`
-      }
-    })
+      .then(() => {
+        if (!hoursLoader.state.error) {
+          // If the hours were successfully updated, update the serverHours value
+          serverHours.value = hoursLoader.state.data?.grading_hours ?? 0
+          state.updatedHoursSuccessfully = true
+          state.updatedHoursError = null
+        } else {
+          state.updatedHoursSuccessfully = false
+          state.updatedHoursError = hoursLoader.state.error
+        }
+      })
 }
 
 watch(hours, updateHours)

@@ -490,9 +490,9 @@ def course_users_view(course_name: str):
     return jsonify(ret)
 
 
-@gat.route("/course/<course_name>/users/<user_email>/set-grader-hours/<int:hours>/", methods=["POST"])
-@rate_limit_per_user(50, 60)  # 50 requests per minute (users may rapidly enter hours for every grader)
-def course_set_grader_hours_view(course_name: str, user_email: str, hours: int):
+@gat.route("/course/<course_name>/users/<user_email>/set-grader-hours/<path:hours_str>/", methods=["POST"])
+@rate_limit_per_user(10, 5)  # 10 requests per 5 seconds
+def course_set_grader_hours_view(course_name: str, user_email: str, hours_str: str):
     # Set the number of hours a grader should work for a course
     course: Course = get_course_by_name_or_404(course_name)
     ensure_user_is_grader_in_course(g.user, course)
@@ -503,7 +503,14 @@ def course_set_grader_hours_view(course_name: str, user_email: str, hours: int):
     if not course_user.is_grader():
         abort(400, "Hours cannot be assigned to students.")
 
-    # Check that the hours are reasonable
+    # Check that the hours value is reasonable
+    try:
+        hours_float: float = float(hours_str)  # Raises ValueError if not a number
+        if not hours_float.is_integer():
+            raise ValueError
+    except ValueError:
+        abort(400, "Hours must be an integer.")
+    hours: int = int(hours_str)
     if hours < 0:
         abort(400, "Hours must be non-negative.")
     elif hours > 1000:
