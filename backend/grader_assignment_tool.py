@@ -289,7 +289,7 @@ def create_grading_assignments(
             grader: str = random.choices(viable_graders, weights=grader_weights, k=1)[0]
             # ^ Raises ValueError if all weights are 0 or IndexError if there are no weights (no viable graders)
         except (ValueError, IndexError):
-            abort(400, f"Failed to assign grader for {student}. No viable graders remaining. "
+            abort(400, f"Failed to assign grader for student {student}. No viable graders remaining. "
                        f"Please verify this student's conflicts of interest.")
             return ""  # Just to make the IDE happy
 
@@ -659,6 +659,8 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
     autolab: AutolabApiConnection = current_app.autolab
     assessment: dict = autolab.get_assessment_submissions(course_name, assessment_name)
     submissions_by_student: dict = {submission["email"]: submission for submission in assessment["submissions"]}
+    if len(submissions_by_student) == 0:
+        abort(400, "There are no submissions for this assessment.")
 
     # Get the conflicts of interest
     course_conflicts_of_interest: Sequence[CourseConflictOfInterest] = \
@@ -685,15 +687,12 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
     # Create the grading assignment pairs in the database
     for grader_email, submissions in grading_assignments.items():
         for submission in submissions:
-            student_email = submission["email"]
-            student_version = submission["version"]
-            student_url = submission["url"]
             course_grading_assignment_pair: CourseGradingAssignmentPair = CourseGradingAssignmentPair(
                 course_grading_assignment=course_grading_assignment,
                 grader_email=grader_email,
-                student_email=student_email,
-                submission_url=student_url,
-                submission_version=student_version
+                student_email=submission["email"],
+                submission_url=submission["url"],
+                submission_version=submission["version"]
             )
             g.db.add(course_grading_assignment_pair)
 
@@ -838,7 +837,8 @@ def course_grading_assignment_pair_complete_view(course_name: str, assignment_id
     pair.completed = target_complete
     g.db.commit()
 
-    logger.info(f"{'Completed' if target_complete else 'Incompleted'} grading assignment pair with ID {pair_id}.")
+    logger.info(f"{'Completed' if target_complete else 'Incompleted'} grading assignment pair with ID {pair_id} "
+                f"(course: {course.name}, grader: {pair.grader_email}, student: {pair.student_email}).")
 
     return jsonify({
         "success": True,
