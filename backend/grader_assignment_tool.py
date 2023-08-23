@@ -664,7 +664,11 @@ def course_create_grading_assignment_view(course_name: str, assessment_name: str
 
     # Get the assessment data from Autolab
     autolab: AutolabApiConnection = current_app.autolab
-    assessment: dict = autolab.get_assessment_submissions(course_name, assessment_name)
+    try:
+        assessment: dict = autolab.get_assessment_submissions(course_name, assessment_name)
+    except Exception:
+        abort(404, f"This assessment does not exist in this course.")
+
     submissions_by_student: dict = {submission["email"]: submission for submission in assessment["submissions"]}
     if len(submissions_by_student) == 0:
         abort(400, "There are no submissions for this assessment.")
