@@ -108,7 +108,7 @@
               </li>
             </ul>
           </li>
-          <li>We've chosen a good default ({{ state.stage0.selectedCourse.suggestedName }}), but you're welcome to
+          <li>We've chosen a good default ({{ state.stage0.selectedCourse?.suggestedName }}), but you're welcome to
             change it.
           </li>
         </ul>
@@ -121,7 +121,7 @@
               <p class="text-h1 text-red sampleGrade">A+</p>
             </div>
             <div class="header">
-              {{ state.stage1.typedDisplayName }} ({{ state.stage0.selectedCourse.semesterCode }})
+              {{ state.stage1.typedDisplayName }} ({{ state.stage0.selectedCourse?.semesterCode }})
             </div>
             <div v-for="assignment in state.stage1.sampleAssignments" :key="assignment" class="element">
               {{ assignment }}
@@ -152,16 +152,16 @@
 
 
             <div class="header">
-              {{ state.stage2.displayName }} ({{ state.stage0.selectedCourse.semesterCode }})
+              {{ state.stage2.displayName }} ({{ state.stage0.selectedCourse?.semesterCode }})
             </div>
             <div class="element">
-              First instructor: {{ state.stage0.selectedCourse.instructor }}@buffalo.edu
+              First instructor: {{ state.stage0.selectedCourse?.instructor }}@buffalo.edu
             </div>
             <div class="element">
-              Season: {{ state.stage0.selectedCourse.term }}
+              Season: {{ state.stage0.selectedCourse?.term }}
             </div>
             <div class="element">
-              URL: https://autolab.cse.buffalo.edu/courses/{{ state.stage0.selectedCourse.technicalName }}
+              URL: https://autolab.cse.buffalo.edu/courses/{{ state.stage0.selectedCourse?.technicalName }}
             </div>
             <div class="element">
               Start and end dates will be set automatically
@@ -203,12 +203,6 @@
                      color="primary"/>
             </div>
           </div>
-          <!--          <q-expansion-item-->
-          <!--            class="q-ma-xl"-->
-          <!--            icon="info"-->
-          <!--            label="More information">-->
-          <!--            <p>Server response: {{ state.stage3.response }}</p>-->
-          <!--          </q-expansion-item>-->
         </div>
       </div>
     </div>
@@ -231,7 +225,7 @@ const userStore = useUserStore()
 
 const state = reactive({
   stage: 0,
-  data: [] as MyCoursesResponse[],
+  data: {} as MyCoursesResponse,
   loadingCourses: false,
   errorLoadingCourses: false,
   errorMessage: '',
@@ -257,9 +251,8 @@ const state = reactive({
 })
 
 function loadCourses() {
-  // fetch(`/portal/api/my-courses/${state.username}/`)
   state.stage = 0
-  state.data = [] as MyCoursesResponse[]
+  state.data = {} as MyCoursesResponse
   state.loadingCourses = true
   state.errorLoadingCourses = false
   state.errorMessage = ''
@@ -347,7 +340,10 @@ function moveToStage0() {
   state.stage0.selectedCourse = null as Course | null
 }
 
-function moveToStage1(course: Course) {
+function moveToStage1(course: Course | null) {
+  if (!course) {
+    return
+  }
   scrollToTop()
   state.stage1.showingSampleGrade = false
   updateSampleAssignments()
