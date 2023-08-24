@@ -5,8 +5,6 @@
     </div>
 
     <ApiFetchContentContainer :api-data-loader="assignmentLoader" loading-text="Loading grading assignments">
-
-
       <h4>{{ assignmentLoader.state.data.grading_assignment.course.display_name }} Grading Assignment</h4>
 
       <GradingAssignmentListElement
@@ -72,10 +70,7 @@
 import {useRoute} from 'vue-router'
 import {PortalApiDataLoader} from 'src/utilities/PortalApiDataLoader'
 import ApiFetchContentContainer from 'components/ApiFetchContentContainer.vue'
-import {
-  GatGradingAssignmentPairSubmission,
-  GatGradingAssignmentResponse,
-} from 'src/types/GradingAssignmentToolTypes'
+import {GatGradingAssignmentPairSubmission, GatGradingAssignmentResponse} from 'src/types/GradingAssignmentToolTypes'
 import YouBadge from 'components/YouBadge.vue'
 import {useUserStore} from 'stores/UserStore'
 import GradingAssignmentListElement from 'components/GraderAssignmentTool/GradingAssignmentListElement.vue'

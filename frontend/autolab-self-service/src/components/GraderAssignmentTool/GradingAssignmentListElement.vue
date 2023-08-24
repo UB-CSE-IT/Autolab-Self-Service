@@ -15,6 +15,7 @@
       </p>
       <template v-if="detail">
         <p>Assignment ID: {{ props.gradingAssignment.id }}</p>
+        <p>Autolab assessment: <a :href="autolabAssessmentUrl" target="_blank">{{ autolabAssessmentUrl}}</a></p>
       </template>
     </div>
     <div class="right col-shrink">
@@ -34,7 +35,7 @@
 
 <script setup lang="ts">
 
-import {PropType, ref} from 'vue'
+import {computed, PropType, ref} from 'vue'
 import {GatGradingAssignment} from 'src/types/GradingAssignmentToolTypes'
 import {isoDateToLocaleString} from 'src/utilities/DataFormatter'
 import InstantCheckbox from 'components/InstantCheckbox.vue'
@@ -59,6 +60,8 @@ const props = defineProps({
 const archiveLoader = new PortalApiDataLoader(`/portal/api/gat/course/${props.gradingAssignment?.course.name}/grading-assignments/${props.gradingAssignment.id}/archive/`, 'POST')
 const unarchiveLoader = new PortalApiDataLoader(`/portal/api/gat/course/${props.gradingAssignment?.course.name}/grading-assignments/${props.gradingAssignment.id}/archive/`, 'DELETE')
 const archived = ref(props.gradingAssignment.archived)
+const autolabAssessmentUrl = computed(() =>
+    `https://autolab.cse.buffalo.edu/courses/${props.gradingAssignment?.course.name}/assessments/${props.gradingAssignment?.assessment_name}`)
 
 </script>
 

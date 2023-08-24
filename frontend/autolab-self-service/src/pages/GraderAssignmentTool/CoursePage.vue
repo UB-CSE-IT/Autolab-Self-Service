@@ -9,9 +9,14 @@
       <div class="button-row q-my-lg">
         <q-btn icon="add" label="Create New Grading Assignment" color="primary"
                :to="{name: 'grader-assignment-tool-autolab-assessments'}"/>
+      </div>
+      <div class="button-row q-my-lg">
         <q-btn icon="people" label="Manage People" color="secondary" :to="{name: 'grader-assignment-tool-people'}"/>
         <q-btn icon="sports_martial_arts" label="My Conflicts of Interest" color="secondary"
                :to="{name: 'grader-assignment-tool-person', params: {user: userStore.userData.email}}"/>
+        <q-btn icon="open_in_new" label="Open in Autolab" color="secondary"
+               :href="`https://autolab.cse.buffalo.edu/courses/${courseLoader.state.data?.course.name}`"
+               target="_blank"/>
       </div>
 
       <h5 class="q-mb-sm">Grading Assignments</h5>
