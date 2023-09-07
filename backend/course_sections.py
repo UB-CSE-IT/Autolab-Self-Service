@@ -1,8 +1,8 @@
 import logging
 import cachetools.func
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List, Dict, Any
 
-from flask import abort, current_app, jsonify
+from flask import abort, current_app, jsonify, request
 from flask import Blueprint, g
 
 from backend.connections.autolab_api_connection import AutolabApiConnection
@@ -56,4 +56,27 @@ def get_course_sections(course_name: str):
             "course": course,
             "sections": sections["sections"],
         }
+    })
+
+
+@cs.route("/<course_name>/", methods=["POST"])
+@rate_limit_per_user(1, 2)  # 1 request per 2 seconds
+def upsert_course_sections(course_name: str):
+    # POST body should be a list of sections like:
+    # [
+    #   {
+    #     "days_code": 42,
+    #     "start_time": "13:00:00",
+    #     "end_time": "16:00:00",
+    #     "name": "Auto1",
+    #     "is_lecture": True,
+    #   },...
+    # ]
+    ensure_current_user_is_instructor_in_autolab_course(course_name)
+    sections: List[Dict[str, Any]] = request.get_json()
+    autolab: AutolabApiConnection = current_app.autolab
+    autolab.upsert_course_sections(course_name, sections)
+
+    return jsonify({
+        "success": True,
     })
