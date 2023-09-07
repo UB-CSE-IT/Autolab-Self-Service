@@ -396,7 +396,7 @@ def index_view():
 
 
 @gat.route("/my-autolab-courses/", methods=["GET"])
-@rate_limit_per_user(5, 10)  # 5 requests per 10 seconds
+@rate_limit_per_user(8, 10)  # 8 requests per 10 seconds
 def my_autolab_courses_view():
     courses = get_current_user_autolab_courses()
     ret = {

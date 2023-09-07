@@ -65,7 +65,16 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
-
+      {
+        path: 'course-sections',
+        name: 'course-sections',
+        component: () => import('pages/CourseSections/CourseListPage.vue'),
+      },
+      {
+        path: 'course-sections/:courseName',
+        name: 'course-sections-course',
+        component: () => import('pages/CourseSections/CourseSectionsPage.vue'),
+      },
 
       // Always leave this as last one,
       // but you can also remove it

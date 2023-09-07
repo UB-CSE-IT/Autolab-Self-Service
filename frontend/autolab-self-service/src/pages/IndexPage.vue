@@ -39,6 +39,11 @@
               Grader Assignment Tool (GAT)
             </div>
           </router-link>
+          <router-link :to="{name: 'course-sections'}" v-slot="{ navigate }">
+            <div class="element" role="link" @click="navigate">
+              Manage Course Sections
+            </div>
+          </router-link>
           <!--          <div class="actions">-->
           <!--          </div>-->
         </div>
