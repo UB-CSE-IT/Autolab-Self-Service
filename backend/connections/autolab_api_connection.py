@@ -147,18 +147,19 @@ class AutolabApiConnection:
         store_refresh_token(initial_refresh_token_resp["refresh_token"])
         logger.info("Initial OAuth setup complete")
 
-    def make_api_request(self, method: str, path: str, params: dict, retry: bool = False) -> dict:
+    def make_api_request(self, method: str, path: str, params: dict, json=None, retry: bool = False) -> dict:
         # Makes a request to the Autolab API
         # method: GET, POST, PUT, DELETE, etc.
         # path: relative path to endpoint including leading slash (e.g. "/api/v1/courses")
         # params: dict of params to pass to the endpoint, excluding the access token
+        # json: optional body to send as JSON
         # retry: True if this is a retry after a failed request due to an expired access token
         # Returns the response as a dict and handles refreshing the access token if needed
         # Raises an exception if the request fails even after refreshing the access token
         url = f"{self.__path}{path}"
         logger.debug(f"Making API request to {method} {url} with params: {params} ({retry=})")
         params["access_token"] = self.__access_token
-        r = requests.request(method, url, params=params)
+        r = requests.request(method, url, json=json, params=params)
         if r.status_code != 200:
             logger.debug(f"API request failed with status code {r.status_code}")
             if r.status_code == 429:
@@ -167,7 +168,7 @@ class AutolabApiConnection:
                 logger.debug("Trying again after getting a new access token")
                 self.__get_new_access_token()
                 del params["access_token"]
-                return self.make_api_request(method, path, params, retry=True)
+                return self.make_api_request(method, path, params, json=json, retry=True)
             logger.error(f"API request failed even after getting a new access token with status code {r.status_code}")
             message = "Response: " + r.text
             logger.error(message)
