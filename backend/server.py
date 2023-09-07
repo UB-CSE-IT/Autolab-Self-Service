@@ -5,6 +5,7 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask, Blueprint, jsonify, request, make_response, g, redirect, abort
 from dotenv import load_dotenv
 
+from backend.course_sections import cs
 from backend.grader_assignment_tool import gat
 from backend.per_user_rate_limiter import rate_limit_per_user
 from backend.connections.autolab_api_connection import AutolabApiConnection
@@ -406,6 +407,7 @@ def initialize():
     # db.initialize()  # Let Alembic handle this instead
     app.register_blueprint(app.user_api, url_prefix="/api/user_api")  # The "user API" is for the Autolab Lightsaber
     app.api.register_blueprint(gat, url_prefix="/gat")  # Grader Assignment Tool is an extension of the API
+    app.api.register_blueprint(cs, url_prefix="/course_sections")
     app.register_blueprint(app.api, url_prefix="/api")  # Base API for user functions, creating courses, admin sync
     # Must be registered after all child blueprints
 

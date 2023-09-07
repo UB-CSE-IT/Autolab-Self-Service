@@ -1,5 +1,7 @@
 import logging
 import time
+from typing import List, Dict
+
 import cachetools.func
 import requests
 
@@ -290,3 +292,47 @@ class AutolabApiConnection:
             "assessment_name": assessment_name
         }
         return self.make_api_request("GET", "/api/ubcseit/assessment_submissions", params)
+
+    def get_course_sections(self, course_name: str) -> dict:
+        # Returns all the course sections stored in the database for a given course. Not cached!
+        # Note that students may be assigned to sections that don't exist in the database. This won't return those.
+        # Returns a dict like:
+        # {"course_display_name": "Some Course",
+        #  "course_name": "somecourse",
+        #  "sections": [{"days_code": 42,
+        #                "end_time": "15:00:00",
+        #                "is_lecture": True,
+        #                "name": "A",
+        #                "start_time": "13:00:00"},...
+        #              ]
+        # }
+        # Sections are sorted by days_code, then start_time, then end_time.
+        logger.info(f"Getting Autolab sections for course {course_name}")
+        params = {
+            "course_name": course_name
+        }
+        return self.make_api_request("GET", "/api/ubcseit/course_sections/", params)
+
+    def upsert_course_sections(self, course_name, sections: List[Dict[str, any]]) -> dict:
+        # Create or update course sections for a given course.
+        # Each section is uniquely identified by section_name, and is_lecture.
+        # sections is a list of dicts like:
+        # [
+        #     {
+        #         "days_code": 42,
+        #         "start_time": "13:00:00",
+        #         "end_time": "16:00:00",
+        #         "name": "Auto1",
+        #         "is_lecture": False,
+        #     },...
+        # ]
+        # Returns a dict like:
+        # {"course_display_name": "local", "course_name": "local", "success": True}
+        logger.info(f"Upserting Autolab sections for course {course_name}, {sections}")
+        params = {
+            "course_name": course_name,
+        }
+        data = {
+            "sections": sections
+        }
+        return self.make_api_request("POST", "/api/ubcseit/course_sections/", params, json=data)

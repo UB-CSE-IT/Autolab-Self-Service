@@ -49,20 +49,26 @@ def course_role_to_string(role: CourseRole) -> str:
         raise ValueError(f"Invalid role: {role}")
 
 
+def user_has_role_in_autolab_course(user_email: str, course_name: str, roles: List) -> Tuple[bool, Optional[dict]]:
+    # Returns tuple with true if the user has any of the given roles in the course on Autolab, false otherwise
+    # If true, also return the course information dict
+    autolab: AutolabApiConnection = current_app.autolab
+    user_courses: dict = autolab.user_courses(user_email)
+    for course in user_courses["courses"]:
+        if course["name"] == course_name:
+            if string_to_course_role(course["role"]) in roles:
+                return True, course
+            break
+    return False, None
+
+
 @cachetools.func.ttl_cache(maxsize=100, ttl=60)
 def user_is_grader_in_autolab_course(user_email: str, course_name: str) -> Tuple[bool, Optional[dict]]:
     # Returns true if the user is an instructor or CA in the course on Autolab, false otherwise
     # If true, also return the course information dict
     # This should only be used for initially creating the local course and syncing the roster with Autolab
     # Local course operations should use `user_is_grader_in_course`
-    autolab: AutolabApiConnection = current_app.autolab
-    user_courses: dict = autolab.user_courses(user_email)
-    for course in user_courses["courses"]:
-        if course["name"] == course_name:
-            if string_to_course_role(course["role"]) in [CourseRole.INSTRUCTOR, CourseRole.TA]:
-                return True, course
-            break
-    return False, None
+    return user_has_role_in_autolab_course(user_email, course_name, [CourseRole.INSTRUCTOR, CourseRole.TA])
 
 
 def get_grader_courses(user: User) -> List[Course]:
@@ -96,7 +102,7 @@ def ensure_user_is_grader_in_course(user: User, course: Course):
 def ensure_current_user_is_grader_in_autolab_course(course_name):
     if g.user.is_admin:
         return
-    if not user_is_grader_in_autolab_course(g.user.email, course_name):
+    if not user_is_grader_in_autolab_course(g.user.email, course_name)[0]:
         abort(403, "You are not an instructor or course assistant in this course on Autolab.")
 
 
