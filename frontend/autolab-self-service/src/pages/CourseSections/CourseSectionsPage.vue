@@ -4,22 +4,23 @@
       <q-btn icon="west" label="Back to courses" color="primary" :to="{name: 'course-sections'}"/>
     </div>
     <h4>Manage Course Sections in {{ courseName }}</h4>
-    <div class="button-row q-my-lg">
-      <q-btn label="Save" color="primary" icon="save" @click="updateSections"/>
-    </div>
-
-    <ErrorBox v-if="courseSectionsSubmitter.state.error">
-      <p>{{ courseSectionsSubmitter.state.error }}</p>
-      <ul>
-        <li v-for="error in courseSectionsSubmitter.state.errors" :key="error">{{ error }}</li>
-      </ul>
-    </ErrorBox>
-
-    <SuccessBox v-else-if="courseSectionsSubmitter.state.loaded">
-      <p>Your changes have been saved.</p>
-    </SuccessBox>
-
     <ApiFetchContentContainer :api-data-loader="courseSectionsLoader" loading-text="Loading course sections">
+      <div class="button-row q-my-lg">
+        <q-btn label="Save" color="primary" icon="save" @click="updateSections"/>
+<!--        <q-btn label="Magic Import" color="primary" icon="sync" @click="magicImport"/>-->
+      </div>
+
+      <ErrorBox v-if="courseSectionsSubmitter.state.error">
+        <p>{{ courseSectionsSubmitter.state.error }}</p>
+        <ul>
+          <li v-for="error in courseSectionsSubmitter.state.errors" :key="error">{{ error }}</li>
+        </ul>
+      </ErrorBox>
+
+      <SuccessBox v-else-if="courseSectionsSubmitter.state.loaded">
+        <p>Your changes have been saved.</p>
+      </SuccessBox>
+
       <h5>Lectures</h5>
       <CourseSectionsTable v-model="lectureSections" is-lecture @new-section="newSection"/>
 
@@ -27,7 +28,7 @@
       <CourseSectionsTable v-model="sectionSections" @new-section="newSection"/>
 
       <DebugBox>
-        <pre>{{updatedSections}}</pre>
+        <pre>{{ updatedSections }}</pre>
       </DebugBox>
 
     </ApiFetchContentContainer>
@@ -57,6 +58,7 @@ const lectureSections = computed(() => courseSectionsLoader.state.data?.sections
 const sectionSections = computed(() => courseSectionsLoader.state.data?.sections.filter(section => !section.is_lecture))
 
 const updatedSections = computed(() => courseSectionsLoader.state.data?.sections.filter(section => section.updated))
+
 function updateSections() {
   courseSectionsSubmitter.fetch({
     sections: updatedSections.value,
@@ -67,6 +69,10 @@ function updateSections() {
         }
         courseSectionsLoader.fetch()
       })
+}
+
+function magicImport() {
+  // TODO
 }
 
 function newSection(name: string, isLecture: boolean) {
