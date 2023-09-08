@@ -6,6 +6,7 @@ export interface CourseSection {
   start_time: string
   end_time: string
   days_code: number
+  updated?: boolean
 }
 export interface CourseSectionsResponse {
   course: GatAutolabCourse

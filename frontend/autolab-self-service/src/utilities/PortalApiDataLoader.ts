@@ -4,6 +4,7 @@ interface PortalApiDataLoaderState<T> {
   loading: boolean
   loaded: boolean
   error: string | undefined
+  errors?: string[]
   data: T | null
 }
 
@@ -59,6 +60,11 @@ export class PortalApiDataLoader<T> {
       .then(response => response.json())
       .then(data => {
         if (data.success === false) {
+          if (data.errors) {
+            this.state.errors = data.errors
+          } else {
+            this.state.errors = undefined
+          }
           throw new Error(data.error)
         }
         this.state.data = data.data

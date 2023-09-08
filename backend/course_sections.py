@@ -1,4 +1,6 @@
 import logging
+from datetime import datetime
+
 import cachetools.func
 from typing import Tuple, Optional, List, Dict, Any
 
@@ -29,6 +31,71 @@ def ensure_current_user_is_instructor_in_autolab_course(course_name) -> dict:
     if not is_instructor and not g.user.is_admin:
         abort(403, "You are not an instructor in this course on Autolab.")
     return course_info
+
+
+def validate_sections(sections: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[str]]:
+    # Validate that sections are reasonable. Return a Tuple with a list of valid sections and a list of errors
+    errors: List[str] = []
+    valid_sections: List[Dict[str, Any]] = []
+    for section in sections:
+        section_name = section.get("name", "[Unnamed Section]")
+        if section_name == "":
+            # Ignore empty section names
+            continue
+        is_lecture = section.get("is_lecture", None)
+        if is_lecture is None:
+            errors.append(f"{section_name} is missing is_lecture")
+            continue
+        elif not isinstance(is_lecture, bool):
+            errors.append(f"{section_name} is_lecture must be a boolean")
+            continue
+        section_type: str = "Lecture" if is_lecture else "Section"
+        start_time = section.get("start_time", None)
+        if start_time is None:
+            errors.append(f"{section_type} \"{section_name}\" is missing start_time")
+            continue
+        if not isinstance(start_time, str):
+            errors.append(f"{section_type} \"{section_name}\" start time must be a string")
+            continue
+        try:
+            start_time_dt = datetime.strptime(start_time, "%H:%M:%S")
+        except ValueError:
+            errors.append(f"{section_type} \"{section_name}\" start time must be a valid time formatted as 20:30:40")
+            continue
+        end_time = section.get("end_time", None)
+        if end_time is None:
+            errors.append(f"{section_type} \"{section_name}\" is missing end_time")
+            continue
+        if not isinstance(end_time, str):
+            errors.append(f"{section_type} \"{section_name}\" end time must be a string")
+            continue
+        try:
+            end_time_dt = datetime.strptime(end_time, "%H:%M:%S")
+        except ValueError:
+            errors.append(f"{section_type} \"{section_name}\" end time must be a valid time formatted as 20:30:40")
+            continue
+        if start_time_dt >= end_time_dt:
+            errors.append(f"{section_type} \"{section_name}\" start time must be before end time")
+            continue
+        days_code = section.get("days_code", None)
+        if days_code is None:
+            errors.append(f"{section_type} \"{section_name}\" is missing days code")
+            continue
+        if not isinstance(days_code, int):
+            errors.append(f"{section_type} \"{section_name}\" days code must be an integer")
+            continue
+        if days_code < 0 or days_code > 127:
+            errors.append(f"{section_type} \"{section_name}\" days code must be between 0 and 127")
+            continue
+        valid_sections.append({
+            "name": section["name"],
+            "is_lecture": section["is_lecture"],
+            "start_time": section["start_time"],
+            "end_time": section["end_time"],
+            "days_code": section["days_code"],
+        })
+
+    return valid_sections, errors
 
 
 # Require login for all routes in this blueprint
@@ -62,20 +129,40 @@ def get_course_sections(course_name: str):
 @cs.route("/<course_name>/", methods=["POST"])
 @rate_limit_per_user(1, 2)  # 1 request per 2 seconds
 def upsert_course_sections(course_name: str):
-    # POST body should be a list of sections like:
-    # [
-    #   {
-    #     "days_code": 42,
-    #     "start_time": "13:00:00",
-    #     "end_time": "16:00:00",
-    #     "name": "Auto1",
-    #     "is_lecture": True,
-    #   },...
-    # ]
+    # POST body should be a dict with a list of sections like:
+    # {
+    #   "sections": [
+    #     {
+    #       "days_code": 42,
+    #       "start_time": "13:00:00",
+    #       "end_time": "16:00:00",
+    #       "name": "Auto1",
+    #       "is_lecture": True,
+    #     },...
+    #   ]
+    # }
     ensure_current_user_is_instructor_in_autolab_course(course_name)
-    sections: List[Dict[str, Any]] = request.get_json()
+    sections: List[Dict[str, Any]] = request.get_json().get("sections", [])
+
+    valid_sections: List[Dict[str, Any]]
+    errors: List[str]
+    valid_sections, errors = validate_sections(sections)
+
+    if len(errors) > 0:
+        return jsonify({
+            "success": False,
+            "error": "There were errors in the sections you provided. Nothing has been updated. Here are the details:",
+            "errors": errors,
+        }), 400
+
+    if len(valid_sections) == 0:
+        return jsonify({
+            "success": False,
+            "error": "No sections were updated.",
+        }), 400
+
     autolab: AutolabApiConnection = current_app.autolab
-    autolab.upsert_course_sections(course_name, sections)
+    autolab.upsert_course_sections(course_name, valid_sections)
 
     return jsonify({
         "success": True,

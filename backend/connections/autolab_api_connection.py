@@ -306,7 +306,7 @@ class AutolabApiConnection:
         #                "start_time": "13:00:00"},...
         #              ]
         # }
-        # Sections are sorted by days_code, then start_time, then end_time.
+        # Sections are sorted alphabetically by name.
         logger.info(f"Getting Autolab sections for course {course_name}")
         params = {
             "course_name": course_name
