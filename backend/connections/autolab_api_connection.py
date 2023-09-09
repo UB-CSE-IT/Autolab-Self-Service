@@ -206,7 +206,7 @@ class AutolabApiConnection:
         }
         return self.make_api_request("GET", "/api/ubcseit/admin_check", params).get("is_administrator", False)
 
-    @cachetools.func.ttl_cache(maxsize=100, ttl=60)
+    @cachetools.func.ttl_cache(maxsize=100, ttl=20)
     def user_courses(self, user_email: str) -> dict:
         # Returns a dict like:
         # {
@@ -227,7 +227,7 @@ class AutolabApiConnection:
         }
         return self.make_api_request("GET", "/api/ubcseit/user_courses", params)
 
-    @cachetools.func.ttl_cache(maxsize=100, ttl=60)
+    @cachetools.func.ttl_cache(maxsize=100, ttl=20)
     def course_users(self, course_name: str) -> dict:
         # Returns a dict like:
         # {
@@ -248,7 +248,7 @@ class AutolabApiConnection:
         }
         return self.make_api_request("GET", "/api/ubcseit/course_users", params)
 
-    @cachetools.func.ttl_cache(maxsize=100, ttl=60)
+    @cachetools.func.ttl_cache(maxsize=100, ttl=20)
     def course_assessments(self, course_name: str) -> dict:
         # Returns a dict like:
         # {

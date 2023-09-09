@@ -8,6 +8,7 @@ from flask import abort, current_app, jsonify, request
 from flask import Blueprint, g
 
 from backend.connections.autolab_api_connection import AutolabApiConnection
+from backend.connections.infosource_connection import InfoSourceConnection
 from backend.models.gat_models import CourseRole
 from backend.per_user_rate_limiter import rate_limit_per_user
 import backend.grader_assignment_tool as gat
@@ -163,6 +164,35 @@ def upsert_course_sections(course_name: str):
 
     autolab: AutolabApiConnection = current_app.autolab
     autolab.upsert_course_sections(course_name, valid_sections)
+
+    return jsonify({
+        "success": True,
+    })
+
+
+@cs.route("/<course_name>/import/", methods=["POST"])
+@rate_limit_per_user(1, 7)  # 1 request per 7 seconds
+def import_infosource_course_sections(course_name: str):
+    # Find and import course sections from InfoSource
+    ensure_current_user_is_instructor_in_autolab_course(course_name)
+    autolab: AutolabApiConnection = current_app.autolab
+    infosource: InfoSourceConnection = current_app.infosource
+    try:
+        sections: List[Dict[str, Any]] = infosource.get_course_sections_by_autolab_course_name(course_name)
+    except Exception as e:
+        logger.error(f"Error getting course sections from InfoSource: {e}")
+        return jsonify({
+            "success": False,
+            "error": "An error occurred while querying the UB database. This course may not exist in the UB database.",
+        }), 500
+
+    if len(sections) == 0:
+        return jsonify({
+            "success": False,
+            "error": "No sections were found for this course in the UB database.",
+        }), 400
+
+    autolab.upsert_course_sections(course_name, sections)
 
     return jsonify({
         "success": True,

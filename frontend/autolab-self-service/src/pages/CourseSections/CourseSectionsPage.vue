@@ -4,23 +4,42 @@
       <q-btn icon="west" label="Back to courses" color="primary" :to="{name: 'course-sections'}"/>
     </div>
     <h4>Manage Course Sections in {{ courseName }}</h4>
+
+    <div class="button-row q-my-lg" v-if="courseSectionsLoader.state.loaded">
+      <q-btn label="Save"
+             color="primary"
+             icon="save"
+             @click="updateSections"
+             :loading="courseSectionsSubmitter.state.loading"
+             :disable="!unsavedChanges"/>
+      <q-btn label="Magic Import"
+             color="primary"
+             icon="sync"
+             @click="magicImport"
+             :loading="courseSectionImporter.state.loading"
+             :disable="unsavedChanges"/>
+    </div>
+
+    <ErrorBox v-if="courseSectionsSubmitter.state.error">
+      <p>{{ courseSectionsSubmitter.state.error }}</p>
+      <ul>
+        <li v-for="error in courseSectionsSubmitter.state.errors" :key="error">{{ error }}</li>
+      </ul>
+    </ErrorBox>
+
+    <SuccessBox v-else-if="courseSectionsSubmitter.state.loaded">
+      <p>Your changes have been saved.</p>
+    </SuccessBox>
+
+    <ErrorBox v-if="courseSectionImporter.state.error">
+      <p>{{ courseSectionImporter.state.error }}</p>
+    </ErrorBox>
+
+    <SuccessBox v-else-if="courseSectionImporter.state.loaded">
+      <p>Sections have been imported from UB's course database.</p>
+    </SuccessBox>
+
     <ApiFetchContentContainer :api-data-loader="courseSectionsLoader" loading-text="Loading course sections">
-      <div class="button-row q-my-lg">
-        <q-btn label="Save" color="primary" icon="save" @click="updateSections"/>
-<!--        <q-btn label="Magic Import" color="primary" icon="sync" @click="magicImport"/>-->
-      </div>
-
-      <ErrorBox v-if="courseSectionsSubmitter.state.error">
-        <p>{{ courseSectionsSubmitter.state.error }}</p>
-        <ul>
-          <li v-for="error in courseSectionsSubmitter.state.errors" :key="error">{{ error }}</li>
-        </ul>
-      </ErrorBox>
-
-      <SuccessBox v-else-if="courseSectionsSubmitter.state.loaded">
-        <p>Your changes have been saved.</p>
-      </SuccessBox>
-
       <h5>Lectures</h5>
       <CourseSectionsTable v-model="lectureSections" is-lecture @new-section="newSection"/>
 
@@ -53,11 +72,13 @@ const courseSectionsLoader = new PortalApiDataLoader<CourseSectionsResponse>(`/p
 courseSectionsLoader.fetch()
 
 const courseSectionsSubmitter = new PortalApiDataLoader(`/portal/api/course_sections/${courseName}/`, 'POST')
+const courseSectionImporter = new PortalApiDataLoader(`/portal/api/course_sections/${courseName}/import/`, 'POST')
 
 const lectureSections = computed(() => courseSectionsLoader.state.data?.sections.filter(section => section.is_lecture))
 const sectionSections = computed(() => courseSectionsLoader.state.data?.sections.filter(section => !section.is_lecture))
 
 const updatedSections = computed(() => courseSectionsLoader.state.data?.sections.filter(section => section.updated))
+const unsavedChanges = computed(() => updatedSections.value && updatedSections.value.length > 0)
 
 function updateSections() {
   courseSectionsSubmitter.fetch({
@@ -72,7 +93,13 @@ function updateSections() {
 }
 
 function magicImport() {
-  // TODO
+  courseSectionImporter.fetch()
+      .then(() => {
+        if (courseSectionImporter.state.error) {
+          return
+        }
+        courseSectionsLoader.fetch()
+      })
 }
 
 function newSection(name: string, isLecture: boolean) {
