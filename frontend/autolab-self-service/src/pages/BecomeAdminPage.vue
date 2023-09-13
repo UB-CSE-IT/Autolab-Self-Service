@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-px-lg q-mx-auto" style="max-width: 1000px;">
-    <h3>Become an Admin</h3>
+    <h3>Become an Administrator</h3>
     <q-btn icon="west" label="Back to portal home" color="primary" to="/"/>
 
     <p class="q-mt-lg">If you're a system-wide administrator on Autolab, you can sync that status to the self-service

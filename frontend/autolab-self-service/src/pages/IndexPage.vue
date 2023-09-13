@@ -12,7 +12,7 @@
           </div>
           <router-link :to="{name: 'tango-statistics'}" v-slot="{ navigate }">
             <div class="element" role="link" @click="navigate">
-              View Tango statistics
+              View Tango Statistics
             </div>
           </router-link>
           <div class="actions">
@@ -31,7 +31,7 @@
           </div>
           <router-link :to="{name: 'create-course'}" v-slot="{ navigate }">
             <div class="element" role="link" @click="navigate">
-              Create a course
+              Create a Course
             </div>
           </router-link>
           <router-link :to="{name: 'grader-assignment-tool'}" v-slot="{ navigate }">
@@ -56,7 +56,7 @@
           </div>
           <router-link :to="{name: 'become-admin'}" v-slot="{ navigate }">
             <div class="element" role="link" @click="navigate">
-              Become an administrator
+              Become an Administrator
             </div>
           </router-link>
         </div>
