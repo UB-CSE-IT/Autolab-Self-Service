@@ -45,6 +45,13 @@ def init_logging():
                 record.request_id = "------"  # This length matches the padding of 6 below to avoid prefixing it with 0s
             record.request_id = f"R#{record.request_id.rjust(6, '0')}".rjust(8)
 
+            # Determine the username for the request
+            try:
+                record.username = f"{g.user.username}"
+            except (AttributeError, RuntimeError):
+                record.username = ""
+            record.username = f"{record.username}".ljust(10)
+
             # Indent all log messages except the first one in a request
             try:
                 record.indent = g.request_initiated * "    "
@@ -55,7 +62,8 @@ def init_logging():
     os.makedirs("mount/logs", exist_ok=True)
     logger.setLevel(logging.DEBUG if app.developer_mode else logging.INFO)
     handler = RotatingFileHandler("mount/logs/portal.log", maxBytes=10_000_000, backupCount=5_000)
-    formatter = logging.Formatter("%(asctime)s %(levelname)s %(request_id)s%(indent)s %(message)s (%(module)s)")
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(request_id)s "
+                                  "%(username)s%(indent)s %(message)s (%(module)s)")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.addFilter(RequestContextFilter())
@@ -71,17 +79,22 @@ def before_request():
     session_cookie = request.cookies.get("ubcse_autolab_portal_session", "")
     g.user = Session.get_user(session_cookie)
     logger.info(
-        f"Beginning request #{g.request_number} {request.method} {request.path} "
+        f"{request.method} {request.path} "
         f"from {g.user.username if g.user else '(unknown user)'} "
         f"at {get_client_ip(request)}")
     g.request_initiated = True
+    data = request.get_data()
+    if len(data) > 0:
+        logger.debug(f"Request body: {data}")
 
 
 @app.api.after_request
 def after_request(response):
     g.db.close()
-    if response.json and response.json.get("error"):
-        logger.info(f"Error: {response.json['error']}")
+    rjson = response.json
+    if rjson and rjson.get("error"):
+        logger.info(f"Error: {rjson['error']}")
+    logger.debug(f"Response: {rjson}")
     logger.info(f"Finished request #{g.request_number} with status {response.status}")
     return response
 
@@ -380,7 +393,7 @@ def user_api_before_request():
         abort(403)
     g.db = get_db_session()
     logger.debug(
-        f"Beginning request #{g.request_number} {request.method} {request.path} "
+        f"{request.method} {request.path} "
         f"from USER API "
         f"at {get_client_ip(request)}")
     g.request_initiated = True
