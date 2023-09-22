@@ -278,6 +278,12 @@ def create_course():
         }), 401
     data = request.get_json()
     unique_course_identifier = data.get("uniqueIdentifier")
+    professor = app.course_store.get_professors().get(g.user.username)
+    if professor is None:
+        return jsonify({
+            "success": False,
+            "error": "You are not the primary instructor of any courses."
+        }), 403
     course = app.course_store.get_by_unique_identifier(unique_course_identifier)
     if course is None:
         return jsonify({
@@ -290,7 +296,8 @@ def create_course():
             "success": False,
             "error": "Missing required field: displayName"
         }), 400
-    if g.user.username != course.instructor and not g.user.is_admin:
+    # This ensures that if a course is taught by multiple professors, any of them can create it
+    if course.technical_name not in (c.technical_name for c in professor.courses) and not g.user.is_admin:
         return jsonify({
             "success": False,
             "error": "You are not the instructor of this course."
