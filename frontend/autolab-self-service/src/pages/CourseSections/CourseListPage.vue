@@ -2,6 +2,9 @@
   <q-page class="q-px-lg q-mx-auto" style="max-width: 1000px;">
     <div class="button-row q-my-lg">
       <q-btn icon="west" label="Back to portal home" color="primary" to="/"/>
+      <q-btn icon="description" label="Read the Docs" color="primary"
+             href="https://github.com/UB-CSE-IT/Autolab-Public-Documentation/blob/main/UB%20course%20sections.md"
+             target="_blank"/>
     </div>
     <h3>Manage Course Sections</h3>
     <p>Choose one of your Autolab courses to manage lecture and section times. You must be an
