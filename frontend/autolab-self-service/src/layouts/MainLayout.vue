@@ -8,7 +8,7 @@
             <q-avatar>
               <img src="/portal/icons/autolab.svg" alt="Autolab Logo">
             </q-avatar>
-            Autolab Self-Service Portal{{ userStore.developerMode ? ' (Developer Mode)' : '' }}
+            Autolab Portal{{ userStore.developerMode ? ' (Developer Mode)' : '' }}
           </q-toolbar-title>
         </q-btn>
       </q-toolbar>
