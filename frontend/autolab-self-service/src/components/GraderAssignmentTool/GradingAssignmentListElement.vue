@@ -61,7 +61,7 @@ const archiveLoader = new PortalApiDataLoader(`/portal/api/gat/course/${props.gr
 const unarchiveLoader = new PortalApiDataLoader(`/portal/api/gat/course/${props.gradingAssignment?.course.name}/grading-assignments/${props.gradingAssignment.id}/archive/`, 'DELETE')
 const archived = ref(props.gradingAssignment.archived)
 const autolabAssessmentUrl = computed(() =>
-    `https://autolab.cse.buffalo.edu/courses/${props.gradingAssignment?.course.name}/assessments/${props.gradingAssignment?.assessment_name}`)
+    `/courses/${props.gradingAssignment?.course.name}/assessments/${props.gradingAssignment?.assessment_name}`)
 
 </script>
 

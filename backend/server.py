@@ -319,7 +319,7 @@ def create_course():
         "success": True,
         "data": {
             "message": f"You successfully created the course {display_name}",
-            "location": f"https://autolab.cse.buffalo.edu/courses/{course.technical_name}",
+            "location": f"/courses/{course.technical_name}",
         }
     })
 

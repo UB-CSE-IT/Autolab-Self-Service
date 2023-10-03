@@ -16,7 +16,7 @@
             </div>
           </router-link>
           <div class="actions">
-            <q-btn href="https://autolab.cse.buffalo.edu/" label="Return to Autolab" color="primary" flat/>
+            <q-btn href="/" label="Return to Autolab" color="primary" flat/>
             <form method="POST" action="/portal/api/logout/">
               <q-btn label="Log out" color="primary" flat type="submit"/>
             </form>

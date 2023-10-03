@@ -12,7 +12,7 @@
         <h4>Step 1: Choose a Course</h4>
         <p>Here are the current and upcoming courses you're scheduled to teach. You'll be able to confirm all the
           details before the course is actually created. If you don't see the course you'd
-          like, <a target="_blank" href="https://autolab.cse.buffalo.edu/contact">contact us</a> to create a
+          like, <a target="_blank" href="/contact">contact us</a> to create a
           custom one.</p>
         <AdminBox>
           <p>As an admin, you can create courses for any instructor.</p>
@@ -150,7 +150,7 @@
         <h4>Step 3: Confirmation</h4>
         <h6 class="q-mb-none">You're about to create this course on Autolab</h6>
         <p>If it looks good to you, click "confirm." If you'd like to change something beyond what this portal allows,
-          feel free to <a target="_blank" href="https://autolab.cse.buffalo.edu/contact">contact CSE IT</a> for a custom
+          feel free to <a target="_blank" href="/contact">contact CSE IT</a> for a custom
           solution.</p>
         <div class="row justify-center">
           <div class="autolab-card" style="position:relative;">
@@ -160,13 +160,13 @@
               {{ state.stage2.displayName }} ({{ state.stage0.selectedCourse?.semesterCode }})
             </div>
             <div class="element">
+              Technical name: {{ state.stage0.selectedCourse?.technicalName }}
+            </div>
+            <div class="element">
               First instructor: {{ state.stage0.selectedCourse?.instructor }}@buffalo.edu
             </div>
             <div class="element">
               Season: {{ state.stage0.selectedCourse?.term }}
-            </div>
-            <div class="element">
-              URL: https://autolab.cse.buffalo.edu/courses/{{ state.stage0.selectedCourse?.technicalName }}
             </div>
             <div class="element">
               Start and end dates will be set automatically
@@ -191,7 +191,7 @@
           </h4>
           <p>Server response: {{ state.stage3.errorMessage }}</p>
           <p>If that's not descriptive enough to resolve the problem, or the problem isn't something in your control,
-            <a target="_blank" href="https://autolab.cse.buffalo.edu/contact">contact us</a>.</p>
+            <a target="_blank" href="/contact">contact us</a>.</p>
         </div>
         <div class="" v-else>
           <q-btn icon="west" label="Back to portal home" color="primary" to="/"/>
