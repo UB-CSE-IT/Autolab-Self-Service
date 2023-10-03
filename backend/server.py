@@ -2,6 +2,8 @@ import logging
 import os
 import random
 from logging.handlers import RotatingFileHandler
+from typing import Optional
+
 from flask import Flask, Blueprint, jsonify, request, make_response, g, redirect, abort
 from dotenv import load_dotenv
 
@@ -234,6 +236,56 @@ def userinfo():
         "success": True,
         "data": g.user.to_dict(),
         "developerMode": app.developer_mode,
+    })
+
+
+@app.api.route("/userinfo/preferred-name/", methods=["POST"])
+@rate_limit_per_user(1, 1)  # 1 request per second.
+def set_preferred_name():
+    if g.user is None:
+        return jsonify({
+            "success": False,
+            "error": "You are not logged in.",
+            "developerMode": app.developer_mode,
+        }), 401
+
+    data = request.get_json()
+    preferred_name: Optional[str] = data.get("preferredName")
+
+    if preferred_name is None:
+        return jsonify({
+            "success": False,
+            "error": "Missing required field: preferredName"
+        }), 400
+
+    max_length = 30
+    if len(preferred_name) > max_length:
+        return jsonify({
+            "success": False,
+            "error": f"Name cannot be longer than {max_length} characters."
+        }), 400
+
+    allowed_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-'"
+    if any(c not in allowed_chars for c in preferred_name):
+        return jsonify({
+            "success": False,
+            "error": "Name can only contain letters, dashes, and apostrophes."
+        }), 400
+
+    if preferred_name == "":
+        preferred_name = None
+    else:
+        if not preferred_name[0].isupper():
+            preferred_name = preferred_name[0].upper() + preferred_name[1:]
+            logger.info(f"Capitalized preferred name to {preferred_name}")
+
+    g.user.preferred_name = preferred_name
+    g.db.commit()
+    logger.info(f"User {g.user.username} set their preferred name to {preferred_name}.")
+
+    return jsonify({
+        "success": True,
+        "data": g.user.to_dict(),
     })
 
 

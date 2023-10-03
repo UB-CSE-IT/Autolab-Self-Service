@@ -31,6 +31,9 @@ export const useUserStore = defineStore('user-store', {
           this.userDataLoading = false
         })
     },
+    updateName(name: string) {
+      this.userData.firstName = name
+    }
   },
   getters: {},
 })

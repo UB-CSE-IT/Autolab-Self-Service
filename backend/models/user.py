@@ -21,6 +21,7 @@ class User(Base):
     registered_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     last_login = Column(DateTime(timezone=True), server_default=func.now())
     login_count = Column(Integer, default=0, nullable=False)
+    preferred_name = Column(String, nullable=True)
 
     def __repr__(self):
         return f"<User {self.username}>"
@@ -44,10 +45,13 @@ class User(Base):
         logger.info(f"User {self.username} logged in. This is their login number {self.login_count}")
         g.db.commit()
 
+    def display_first_name(self):
+        return self.preferred_name or self.first_name
+
     def to_dict(self):
         return {
             "username": self.username,
-            "firstName": self.first_name,
+            "firstName": self.display_first_name(),
             "lastName": self.last_name,
             "isAdmin": self.is_admin,
             "email": self.email,
@@ -59,7 +63,7 @@ class User(Base):
 
     @property
     def display_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.display_first_name()} {self.last_name}"
 
     @staticmethod
     def get_by_username(username: str) -> "User":

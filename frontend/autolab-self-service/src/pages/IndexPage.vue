@@ -1,6 +1,22 @@
 <template>
   <q-page class="q-px-lg q-mx-auto" style="max-width: 1000px;">
-    <h3>Welcome, {{ userStore.userData.firstName }}!</h3>
+    <div class="row items-center full-width">
+      <h3 class="row"><span>Welcome,&nbsp;</span><span v-if="!editName">{{ userStore.userData.firstName }}!
+        <span>
+          <q-btn v-if="!editName"
+                 class="q-ml-sm"
+                 dense
+                 size="12px"
+                 flat
+                 color="primary"
+                 icon="edit"
+                 aria-label="Edit name"
+                 @click="editName = !editName"/>
+        </span>
+        </span>
+      </h3>
+      <PreferredNameBox v-if="editName" :shown="editName" @close="editName=false"/>
+    </div>
     <h6>What would you like to do today?</h6>
 
     <div class="flex">
@@ -68,7 +84,10 @@
 
 <script setup lang="ts">
 import {useUserStore} from 'stores/UserStore'
+import PreferredNameBox from 'components/PreferredNameBox.vue'
+import {ref} from 'vue'
 
 const userStore = useUserStore()
+const editName = ref(false)
 
 </script>
