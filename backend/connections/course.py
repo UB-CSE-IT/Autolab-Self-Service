@@ -3,7 +3,7 @@ from typing import List, Dict, Optional, Any
 
 class Course:
     def __init__(self, subject_source_key: str, course_number: str, course: str, course_type: str, term: str,
-                 combined_section_id: str, term_source_key: str, catalog_number_source_key: str, course_source_key: str,
+                 combined_section_id: str, term_source_key: str, course_id: str, class_number: str,
                  instructor: str):
         self.subject_source_key = subject_source_key
         self.course_number = course_number
@@ -12,8 +12,8 @@ class Course:
         self.term = term
         self.combined_section_id = combined_section_id
         self.term_source_key = term_source_key
-        self.catalog_number_source_key = catalog_number_source_key
-        self.course_source_key = course_source_key
+        self.course_id = course_id
+        self.class_number = class_number
         self.instructor = instructor
 
         self.friendly_name = f"{self.subject_source_key} {self.course_number}"
@@ -21,8 +21,8 @@ class Course:
     def __repr__(self):
         return f"<Course '{self.friendly_name}' {self.subject_source_key} {self.course_number} {self.course}" \
                f"{self.course_type} {self.term} '{self.suggested_name=}' " \
-               f"{self.combined_section_id} {self.term_source_key} {self.catalog_number_source_key} " \
-               f"{self.course_source_key} {self.instructor} (Unique ID: '{self.unique_identifier}', Crosslisted ID: " \
+               f"{self.combined_section_id} {self.term_source_key} {self.course_id} " \
+               f"{self.class_number} {self.instructor} (Unique ID: '{self.unique_identifier}', Crosslisted ID: " \
                f"{self.crosslisted_identifier})>"
 
     def __str__(self):
@@ -31,7 +31,7 @@ class Course:
     @property
     def unique_identifier(self) -> str:
         # Used to verify course information on backend when the instructor chooses a course
-        return f"{self.term_source_key} {self.catalog_number_source_key} {self.course_source_key}"
+        return f"{self.term_source_key} {self.course_id} {self.class_number}"
 
     @property
     def crosslisted_identifier(self) -> Optional[str]:
@@ -69,8 +69,8 @@ class Course:
             "term": self.term,
             "combinedSectionId": self.combined_section_id,
             "termSourceKey": self.term_source_key,
-            "catalogNumberSourceKey": self.catalog_number_source_key,
-            "courseSourceKey": self.course_source_key,
+            "course_id": self.course_id,
+            "class_number": self.class_number,
             "instructor": self.instructor,
             "friendlyName": self.friendly_name,
             "uniqueIdentifier": self.unique_identifier,

@@ -42,8 +42,8 @@ class InfoSourceConnection:
                 TERM,
                 COMBINEDSECTIONID,
                 TERMSOURCEKEY,
-                CATALOGNUMBERSOURCEKEY,
-                COURSESOURCEKEY,
+                COURSEID,
+                CLASSNUMBER,
                 PRINCIPAL                            as INSTRUCTOR
             FROM PS_RPT.CLASSSCHEDULE_V
                 JOIN DCE.PERSON_NUMBER ON CLASSSCHEDULE_V.FACULTYSOURCEKEY = PERSON_NUMBER.PERSON_NUMBER
@@ -56,8 +56,8 @@ class InfoSourceConnection:
             TERM,
             COMBINEDSECTIONID,
             TERMSOURCEKEY,
-            CATALOGNUMBERSOURCEKEY,
-            COURSESOURCEKEY,
+            COURSEID,
+            CLASSNUMBER,
             PRINCIPAL,
             ENDDATE
             ORDER BY ENDDATE, COURSENUMBER

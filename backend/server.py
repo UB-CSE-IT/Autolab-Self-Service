@@ -330,18 +330,18 @@ def create_course():
         }), 401
     data = request.get_json()
     unique_course_identifier = data.get("uniqueIdentifier")
-    professor = app.course_store.get_professors().get(g.user.username)
-    if professor is None:
-        return jsonify({
-            "success": False,
-            "error": "You are not the primary instructor of any courses."
-        }), 403
     course = app.course_store.get_by_unique_identifier(unique_course_identifier)
     if course is None:
         return jsonify({
             "success": False,
             "error": "Course not found."
         }), 404
+    professor = app.course_store.get_professors().get(course.instructor)
+    if professor is None:
+        return jsonify({
+            "success": False,
+            "error": "Instructor does not exist in database of professors."
+        }), 403
     display_name = data.get("displayName")
     if display_name is None:
         return jsonify({
