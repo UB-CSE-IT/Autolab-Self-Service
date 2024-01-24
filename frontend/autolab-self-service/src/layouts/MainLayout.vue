@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf">
+  <q-layout view="hHh lpR fff">
 
     <q-header class="text-white" :class="headerClass" height-hint="98">
       <q-toolbar class="flex column content-center justify-center">
@@ -15,9 +15,16 @@
     </q-header>
 
     <q-page-container>
-      <router-view v-if="userStore.loggedIn"/>
+      <router-view class="q-py-sm" v-if="userStore.loggedIn"/>
       <LoginPanel v-else/>
     </q-page-container>
+
+    <q-footer class="bg-primary text-white q-mt-lg q-pa-md">
+      <div class="flex justify-end">
+        <div class="q-mx-lg">UB CSE Autolab Portal
+          <span v-if="userStore.version !== undefined"> v. {{ userStore.version }}</span></div>
+      </div>
+    </q-footer>
   </q-layout>
 </template>
 

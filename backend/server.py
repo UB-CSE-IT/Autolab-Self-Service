@@ -19,6 +19,7 @@ from backend.models.session import Session
 from backend.models.user import User
 from backend.utils import get_client_ip
 
+__version__ = "2024.0.0"
 logger = logging.getLogger("portal")
 load_dotenv()
 app = Flask(__name__)
@@ -231,11 +232,13 @@ def userinfo():
             "success": False,
             "error": "You are not logged in.",
             "developerMode": app.developer_mode,
+            "version": __version__
         }), 401
     return jsonify({
         "success": True,
         "data": g.user.to_dict(),
         "developerMode": app.developer_mode,
+        "version": __version__
     })
 
 
