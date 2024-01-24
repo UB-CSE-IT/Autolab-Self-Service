@@ -32,8 +32,12 @@
              color="primary"
              class="q-mt-md"
              type="submit"
-             :disable="newSectionName === '' || newSectionNameAlreadyExists()"/>
+             :disable="addDisabled"/>
     </div>
+    <p v-if="addDisabled && addDisabledMessage" class="q-mt-sm text-red">
+      <q-icon name="warning" class="q-mr-sm"/>
+      {{ addDisabledMessage }}
+    </p>
   </form>
 </template>
 
@@ -59,6 +63,22 @@ const emits = defineEmits(['newSection'])
 const sectionTypeName = computed(() => props.isLecture ? 'Lecture' : 'Section')
 const newSectionName = ref('')
 
+const addDisabled = computed(() => {
+  return newSectionName.value === ''
+    || newSectionNameAlreadyExists()
+    || newSectionNameHasLeadingOrTrailingWhitespace()
+})
+
+const addDisabledMessage = computed(() => {
+  if (newSectionNameAlreadyExists()) {
+    return 'That section already exists'
+  } else if (newSectionNameHasLeadingOrTrailingWhitespace()) {
+    return 'That section name contains a leading or trailing whitespace'
+  }
+
+  return ''
+})
+
 function addSection() {
   emits('newSection', newSectionName.value, props.isLecture)
   newSectionName.value = ''
@@ -66,6 +86,12 @@ function addSection() {
 
 function newSectionNameAlreadyExists() {
   return props.modelValue.some(section => section.name === newSectionName.value)
+}
+
+function newSectionNameHasLeadingOrTrailingWhitespace() {
+  console.log(newSectionName.value)
+  return newSectionName.value[0] === ' '
+    || newSectionName.value[newSectionName.value.length - 1] === ' '
 }
 
 
