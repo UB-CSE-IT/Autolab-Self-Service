@@ -89,7 +89,6 @@ function newSectionNameAlreadyExists() {
 }
 
 function newSectionNameHasLeadingOrTrailingWhitespace() {
-  console.log(newSectionName.value)
   return newSectionName.value[0] === ' '
     || newSectionName.value[newSectionName.value.length - 1] === ' '
 }
