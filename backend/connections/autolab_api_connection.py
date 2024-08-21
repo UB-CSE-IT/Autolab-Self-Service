@@ -161,14 +161,23 @@ class AutolabApiConnection:
         url = f"{self.__path}{path}"
         logger.debug(f"Making API request to {method} {url} with params: {params} ({retry=})")
         params["access_token"] = self.__access_token
-        r = requests.request(method, url, json=json, params=params)
+        try:
+            r = requests.request(method, url, json=json, params=params)
+        except Exception as e:
+            logger.error(str(e))
+            raise Exception("Failed to connect to Autolab API. Detailed information has been logged.")
         if r.status_code != 200:
             logger.debug(f"API request failed with status code {r.status_code}")
             if r.status_code == 429:
                 raise Exception("Autolab API rate limit exceeded. Try again in a few seconds.")
             if not retry:
                 logger.debug("Trying again after getting a new access token")
-                self.__get_new_access_token()
+                try:
+                    self.__get_new_access_token()
+                except Exception as e:
+                    logger.error(str(e))
+                    raise Exception(
+                        "Failed to get API access token from Autolab. Detailed information has been logged.")
                 del params["access_token"]
                 return self.make_api_request(method, path, params, json=json, retry=True)
             logger.error(f"API request failed even after getting a new access token with status code {r.status_code}")
