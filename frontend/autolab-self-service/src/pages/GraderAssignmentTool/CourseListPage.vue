@@ -3,7 +3,7 @@
     <div class="button-row q-my-lg">
       <q-btn icon="west" label="Back to portal home" color="primary" :to="{name: 'index'}"/>
       <q-btn icon="description" label="Read the Docs" color="primary"
-             href="https://github.com/UB-CSE-IT/Autolab-Public-Documentation/blob/main/Grader%20Assignment%20Tool.md"
+             href="https://napps.cse.buffalo.edu/docs/autolab/Grader%20Assignment%20Tool"
              target="_blank"/>
     </div>
 

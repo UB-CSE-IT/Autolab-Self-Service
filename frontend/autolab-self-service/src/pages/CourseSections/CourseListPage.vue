@@ -3,7 +3,7 @@
     <div class="button-row q-my-lg">
       <q-btn icon="west" label="Back to portal home" color="primary" to="/"/>
       <q-btn icon="description" label="Read the Docs" color="primary"
-             href="https://github.com/UB-CSE-IT/Autolab-Public-Documentation/blob/main/UB%20course%20sections.md"
+             href="https://napps.cse.buffalo.edu/docs/autolab/UB%20course%20sections"
              target="_blank"/>
     </div>
     <h3>Manage Course Sections</h3>

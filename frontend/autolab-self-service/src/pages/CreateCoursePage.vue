@@ -6,7 +6,7 @@
         <div class="button-row q-my-lg">
           <q-btn icon="west" label="Back to portal home" color="primary" to="/"/>
           <q-btn icon="description" label="Read the Docs" color="primary"
-                 href="https://github.com/UB-CSE-IT/Autolab-Public-Documentation/blob/main/Getting%20started.md#create-a-course"
+                 href="https://napps.cse.buffalo.edu/docs/autolab/Getting%20started#create-a-course"
                  target="_blank"/>
         </div>
         <h4>Step 1: Choose a Course</h4>
