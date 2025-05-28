@@ -19,7 +19,7 @@ from backend.models.session import Session
 from backend.models.user import User
 from backend.utils import get_client_ip
 
-__version__ = "2024.0.1"
+__version__ = "2025.0.0"
 logger = logging.getLogger("portal")
 load_dotenv()
 app = Flask(__name__)
